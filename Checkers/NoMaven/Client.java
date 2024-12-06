@@ -21,15 +21,23 @@ public class Client {
         }
     }
 
+    //Metoda wysylajaca wiadomosc do serwera
     public void tellServer(String message) {
         outa.println("SAY " + message);
     }
     public static void main(String[] args) {
         Client client = new Client("localhost", 55555);
         Scanner input = new Scanner(System.in);
+
         while(input.hasNextLine()){
+            //Sczytywanie wiadomosci od gracza
             String message = input.nextLine();
+            //Wysylanie wiadomosci do serwera
             client.tellServer(message);
+            //Wypisywanie odpowiedzi serwera (tylko chyba się bufferuje i na raz nie wypisuje wiecej niż jednej wiadomości)
+            if(client.in.hasNextLine()){
+                System.out.println(client.in.nextLine());
+            }
         }
         try{
         client.socket.close();

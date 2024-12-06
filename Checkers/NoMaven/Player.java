@@ -16,6 +16,7 @@ public class Player implements Runnable {
         int playerNumber;
         Board board;
 
+        //Konstruktor gracza
         public Player(Socket socket, Board board) {
             this.socket = socket;
             this.board = board;
@@ -25,6 +26,7 @@ public class Player implements Runnable {
             board.currentPlayer = this;
         }
 
+        //Zwracanie nastepnego gracza
         public Player nextPlayer() {
             if(playerNumber==playerCount){
                 return opponents[0];
@@ -33,6 +35,7 @@ public class Player implements Runnable {
             }
         }
 
+        //Uruchamianie watku gracza
         @Override
         public void run() {
             try {
@@ -51,6 +54,7 @@ public class Player implements Runnable {
             }
         }
 
+        //Ustawianie polaczenia z graczem
         private void setup() throws IOException {
             input = new Scanner(socket.getInputStream());
             output = new PrintWriter(socket.getOutputStream(), true);
@@ -58,16 +62,19 @@ public class Player implements Runnable {
 
         }
 
+        //Przetwarzanie komend od gracza
         private void processCommands() {
             while (input.hasNextLine()) {
                 var command = input.nextLine();
                 if (command.startsWith("QUIT")) {
                     return;
                 } else if (command.startsWith("SAY")) {
-                    processMoveCommand();
+                    doWhenSay(command);
                 }
             }
         }
+
+        //Wysylanie wiadomosci do innych graczy
         public void tellOponents(String message){
             for(int i=0;i<playerCount;i++){
                 if(opponents[i]!=this){
@@ -75,10 +82,12 @@ public class Player implements Runnable {
                 }
             }
         }
-        private void processMoveCommand() {
-                board.say("test "+playerNumber,this);
-                output.println("Player "+playerNumber+" said something");
-                tellOponents("Opponent "+playerNumber+" said something");
+
+        //Zajmowanie sie przypadkiem SAY
+        private void doWhenSay(String text) {
+                board.say(text,this);
+                //output.println("Player "+playerNumber+" said something");
+                //tellOponents("Opponent "+playerNumber+" said something");
             
         }
 
