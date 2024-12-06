@@ -21,10 +21,10 @@ public class Server {
             Board board = new Board();
             while (i<playerCount) {
                 
-                //pool.execute(board.new Player(listener.accept(), board));
-                Player player = new Player(listener.accept(), board);
-                board.currentPlayer=player;
-                player.run();
+                pool.execute(new Player(listener.accept(), board));
+                // Player player = new Player(listener.accept(), board);
+                // board.currentPlayer=player;
+                // player.run();
                 System.out.println("Player "+(i+1)+" connected");
                 i++;
             }

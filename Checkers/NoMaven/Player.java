@@ -22,6 +22,7 @@ public class Player implements Runnable {
             playerCount++;
             playerNumber = playerCount;
             opponents[playerNumber-1] = this;
+            board.currentPlayer = this;
         }
 
         public Player nextPlayer() {
