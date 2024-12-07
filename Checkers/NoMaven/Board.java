@@ -1,5 +1,3 @@
-//package lib.test;
-
 import java.util.Arrays;
 
 public class Board {
@@ -36,13 +34,12 @@ public class Board {
         for (int i = 0; i < 4; i++) { // Ustawiamy pionki na 4 wierszach promienia
             for (int j = startY - i; j <= startY + i; j++) {
                 // Sprawdź, czy indeksy nie wychodzą poza zakres planszy
-                if (startX - i >= 0 && startX - i < BOARD_SIZE && j >= 0 && j < BOARD_SIZE) {
-                    boardState[startX - i][j] = playerMark; // Ustaw pionek dla gracza
+                if (startX + i >= 0 && startX + i < BOARD_SIZE && j >= 0 && j < BOARD_SIZE) {
+                    boardState[startX + i][j] = playerMark; // Ustaw pionek dla gracza
                 }
             }
         }
     }
-
 
     // Sprawdza, czy pole na planszy jest zajęte
     public boolean isOccupied(int x, int y) {
@@ -85,6 +82,18 @@ public class Board {
         }
     }
 
+    // Zwraca stan planszy jako ciąg tekstowy (do przesyłania klientom)
+    public synchronized String getBoardState() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                sb.append(boardState[i][j] == null ? "." : boardState[i][j]).append(" ");
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
     // Obsługuje komunikaty od gracza
     public synchronized void say(String text, Player player) {
         if (player != currentPlayer) {
@@ -93,10 +102,21 @@ public class Board {
             // Wypisywanie ruchu gracza
             System.out.println(text);
             // Informowanie innych graczy o ruchu
-            currentPlayer.tellOponents("Player " + player.playerNumber + " says: " + text);
+            currentPlayer.notifyAllPlayers("Player " + player.playerNumber + " says: " + text);
             // Przekazanie ruchu do następnego gracza
             currentPlayer = currentPlayer.nextPlayer();
         }
     }
 }
-
+//public synchronized void say(String text, Player player) {
+//    if (player != currentPlayer) {
+//        System.out.println("Not your turn Player " + player.playerNumber);
+//    } else {
+//        // Wypisywanie ruchu gracza
+//        System.out.println(text);
+//        // Informowanie innych graczy o ruchu
+//        currentPlayer.notifyAllPlayers("Player " + player.playerNumber + " says: " + text);
+//        // Przekazanie ruchu do następnego gracza
+//        currentPlayer = currentPlayer.nextPlayer();  // Zmiana gracza po zakończeniu tury
+//    }
+//}
