@@ -74,6 +74,29 @@ public class Player implements Runnable {
             }
         }
 
+    private void processMoveCommand(String command) {
+        try {
+            // Parsowanie komendy: np. MOVE startX startY endX endY
+            String[] parts = command.split(" ");
+            int startX = Integer.parseInt(parts[1]);
+            int startY = Integer.parseInt(parts[2]);
+            int endX = Integer.parseInt(parts[3]);
+            int endY = Integer.parseInt(parts[4]);
+
+            // Tworzenie obiektu ruchu
+            Move move = new Move(startX, startY, endX, endY, board);
+
+            // Wykonanie ruchu
+            if (move.execute()) {
+                output.println("MOVE_OK");
+            } else {
+                output.println("INVALID_MOVE");
+            }
+        } catch (Exception e) {
+            output.println("ERROR: Invalid move command.");
+        }
+    }
+
         //Wysylanie wiadomosci do innych graczy
         public void tellOponents(String message){
             for(int i=0;i<playerCount;i++){
