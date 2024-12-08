@@ -1,3 +1,5 @@
+package lib.test;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -6,11 +8,15 @@ import java.util.Scanner;
 
 
 
-public class Client {
+public class Client implements Runnable {
 
     private Socket socket;
     private Scanner in;
     private PrintWriter outa;
+
+    public Client(){
+        
+    }
 
     public Client(String serverAddress, int port) {
         try {
@@ -26,7 +32,7 @@ public class Client {
     public void tellServer(String message) {
         outa.println("SAY " + message);
     }
-    public static void main(String[] args) {
+    public void run() {
         Client client = new Client("localhost", 55555);
         Scanner input = new Scanner(System.in);
 

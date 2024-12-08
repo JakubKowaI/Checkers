@@ -21,7 +21,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
-                    <mainClass>lib.test.Main</mainClass>
+                    <mainClass>lib.test.Builder</mainClass>
                 </configuration>
             </plugin>
             <plugin>
