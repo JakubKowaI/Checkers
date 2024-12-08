@@ -1,0 +1,31 @@
+Board:
+    Ma referencję do klasy Player (currentPlayer).
+    Używa Move do zarządzania ruchem (powiązanie z klasą Move).
+
+Player:
+    Ma referencję do klasy Board (gracz wykonuje ruchy na planszy).
+    Ma referencję do innych graczy (opponents[]).
+    Wykonuje Move (tworzy obiekt klasy Move).
+
+Move:
+    Odwołuje się do Board (sprawdza poprawność ruchu, wykonuje zmiany na planszy).
+
+Server:
+    Tworzy obiekty klasy Player.
+    Zarządza połączeniami między graczami i rozgrywką.
+
+  Relacje:
+
+        Board -> Player: Board przechowuje odniesienie do aktualnego gracza (currentPlayer).
+        Player -> Board: Player korzysta z Board do wykonywania ruchów.
+        Player -> Move: Player tworzy i wykonuje obiekty klasy Move.
+        Move -> Board: Move używa Board do wykonania ruchu na planszy.
+        Server -> Player: Server zarządza połączeniami i tworzy obiekty klasy Player.
+
+
+Board --> Player  (Gracz wykonuje ruchy na planszy)
+Player --> Move   (Gracz wykonuje ruchy)
+Move --> Board    (Move modyfikuje planszę)
+Server --> Player (Server zarządza graczami)
+
+

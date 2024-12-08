@@ -1,4 +1,3 @@
-// Plik: Move.java
 public class Move {
     private int startX, startY; // Początkowe współrzędne ruchu
     private int endX, endY;     // Końcowe współrzędne ruchu
@@ -15,12 +14,12 @@ public class Move {
 
     // Metoda do sprawdzenia poprawności ruchu
     public boolean isValid() {
-        // Przykładowa logika: sprawdź czy współrzędne są na planszy
+        // Sprawdź, czy współrzędne początkowe i końcowe są w granicach planszy
         if (!isWithinBounds(startX, startY) || !isWithinBounds(endX, endY)) {
             return false;
         }
 
-        // Sprawdź, czy pole startowe nie jest puste (tu potrzebna byłaby logika planszy)
+        // Sprawdź, czy pole startowe nie jest puste
         if (!board.isOccupied(startX, startY)) {
             return false;
         }
@@ -30,12 +29,14 @@ public class Move {
             return false;
         }
 
-        // Sprawdź reguły gry - np. ruch tylko na sąsiednie pola (dla uproszczenia)
-        if (Math.abs(startX - endX) > 1 || Math.abs(startY - endY) > 1) {
-            return false;
+        // Sprawdź, czy ruch odbywa się na sąsiednie pole (dla uproszczenia)
+        int dx = Math.abs(startX - endX);
+        int dy = Math.abs(startY - endY);
+        if (dx > 1 || dy > 1 || (dx == 1 && dy == 1)) {
+            return false; // Niedozwolony ruch ukośny lub na odległość większą niż 1
         }
 
-        // Jeśli wszystkie testy przeszły, ruch jest poprawny
+        // W przyszłości: można dodać logikę obsługującą przeskakiwanie pionków
         return true;
     }
 
@@ -45,13 +46,13 @@ public class Move {
             return false; // Jeśli ruch jest niepoprawny, nie wykonuj go
         }
 
-        // Aktualizuj planszę: przenieś pionek z pola startowego na końcowe
+        // Przenieś pionek na planszy
         board.movePiece(startX, startY, endX, endY);
         return true;
     }
 
     // Pomocnicza metoda do sprawdzania, czy współrzędne są w granicach planszy
     private boolean isWithinBounds(int x, int y) {
-        return x >= 0 && x < board.getSize() && y >= 0 && y < board.getSize();
+        return board.isValidPosition(x, y);
     }
 }

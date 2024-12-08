@@ -4,31 +4,40 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
 
-
-
 public class Client {
 
     private Socket socket;
     private Scanner in;
-    private PrintWriter outa;
+    private PrintWriter out;
 
     public Client(String serverAddress, int port) {
         try {
             socket = new Socket(serverAddress, port);
             in = new Scanner(socket.getInputStream());
-            outa = new PrintWriter(socket.getOutputStream(), true);
+            out = new PrintWriter(socket.getOutputStream(), true);
+
+            // Odczytuj powitalne wiadomości od serwera
+            while (in.hasNextLine()) {
+                System.out.println(in.nextLine());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    //Metoda wysylajaca wiadomosc do serwera
-    public void tellServer(String message) {
-        outa.println("SAY " + message);
+    public void sendMessage(String message) {
+        out.println(message);
     }
+
+    public void listenToServer() {
+        while (in.hasNextLine()) {
+            System.out.println(in.nextLine());
+        }
+    }
+
     public static void main(String[] args) {
         Client client = new Client("localhost", 55555);
-        Scanner input = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         Listener listener = new Listener(client.in);
         Thread listenerThread = new Thread(listener);
@@ -51,5 +60,5 @@ public class Client {
         }catch(IOException e){
             e.printStackTrace();
         }
-    }   
+    }
 }

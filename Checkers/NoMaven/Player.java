@@ -1,94 +1,93 @@
-//package lib.test;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class Player implements Runnable {
-        char mark;
-        Player opponent;
-        static Player[] opponents = new Player[6];
-        Socket socket;
-        Scanner input;
-        PrintWriter output;
-        static int playerCount = 0;
-        int playerNumber;
-        Board board;
+    char mark; // Znacznik gracza (opcjonalne, do rozbudowy)
+    static Player[] players = new Player[6]; // Tablica graczy w grze
+    Socket socket;
+    Scanner input; // Wejście od klienta
+    PrintWriter output; // Wyjście do klienta
+    static int playerCount = 0; // Liczba graczy w grze
+    int playerNumber; // Numer gracza
+    Board board; // Referencja do planszy
 
-        //Konstruktor gracza
-        public Player(Socket socket, Board board) {
-            this.socket = socket;
-            this.board = board;
-            playerCount++;
-            playerNumber = playerCount;
-            opponents[playerNumber-1] = this;
-            board.currentPlayer = this;
-        }
+    // Konstruktor gracza
+    public Player(Socket socket, Board board) {
+        this.socket = socket;
+        this.board = board;
+        playerCount++;
+        playerNumber = playerCount;
+        players[playerNumber - 1] = this; // Dodanie gracza do tablicy
+    }
 
-        //Zwracanie nastepnego gracza
-        public Player nextPlayer() {
-            if(playerNumber==playerCount){
-                return opponents[0];
-            }else {
-                return opponents[playerNumber];
-            }
-        }
+    // Zwracanie następnego gracza
+    public Player nextPlayer() {
+        return players[(playerNumber) % playerCount];
+    }
 
-        //Uruchamianie watku gracza
-        @Override
-        public void run() {
-            try {
-                setup();
-                processCommands();
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (opponent != null && opponent.output != null) {
-                    opponent.output.println("OTHER_PLAYER_LEFT");
-                }
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-
-        //Ustawianie polaczenia z graczem
-        private void setup() throws IOException {
-            input = new Scanner(socket.getInputStream());
-            output = new PrintWriter(socket.getOutputStream(), true);
-            output.println("WELCOME " + playerNumber);
-
-        }
-
-        //Przetwarzanie komend od gracza
-        private void processCommands() {
-            while (input.hasNextLine()) {
-                var command = input.nextLine();
-                if (command.startsWith("QUIT")) {
-                    return;
-                } else if (command.startsWith("SAY")) {
-                    doWhenSay(command);
-                }
-            }
-        }
-
-    private void processMoveCommand(String command) {
+    // Uruchamianie wątku gracza
+    @Override
+    public void run() {
         try {
-            // Parsowanie komendy: np. MOVE startX startY endX endY
+            setup(); // Inicjalizacja połączenia
+            processCommands(); // Przetwarzanie komend gracza
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Ustawianie połączenia z graczem
+    private void setup() throws IOException {
+        input = new Scanner(socket.getInputStream());
+        output = new PrintWriter(socket.getOutputStream(), true);
+        output.println("WELCOME Player " + playerNumber);
+        output.println("Current board:\n" + board.getBoardState());
+    }
+
+    // Przetwarzanie komend od gracza
+    private void processCommands() {
+        while (input.hasNextLine()) {
+            String command = input.nextLine();
+            if (command.startsWith("QUIT")) {
+                return;
+            } else if (command.startsWith("SAY")) {
+                handleSayCommand(command);
+            } else if (command.startsWith("MOVE")) {
+                handleMoveCommand(command);
+            } else {
+                output.println("INVALID_COMMAND");
+            }
+        }
+    }
+
+    // Obsługa ruchu gracza
+    private void handleMoveCommand(String command) {
+        try {
             String[] parts = command.split(" ");
             int startX = Integer.parseInt(parts[1]);
             int startY = Integer.parseInt(parts[2]);
             int endX = Integer.parseInt(parts[3]);
             int endY = Integer.parseInt(parts[4]);
 
-            // Tworzenie obiektu ruchu
+            if (board.currentPlayer != this) {
+                output.println("NOT_YOUR_TURN");
+                return;
+            }
+
             Move move = new Move(startX, startY, endX, endY, board);
 
-            // Wykonanie ruchu
             if (move.execute()) {
                 output.println("MOVE_OK");
+                notifyAllPlayers("BOARD\n" + board.getBoardState());
+                board.currentPlayer = nextPlayer();
             } else {
                 output.println("INVALID_MOVE");
             }
@@ -97,22 +96,20 @@ public class Player implements Runnable {
         }
     }
 
-        //Wysylanie wiadomosci do innych graczy
-        public void tellOponents(String message){
-            for(int i=0;i<playerCount;i++){
-                if(opponents[i]!=this){
-                    opponents[i].output.println(message);
-                }
+
+
+    // Wysyłanie wiadomości do innych graczy
+    public void notifyAllPlayers(String message) {
+        for (Player player : players) {
+            if (player != null) {
+                player.output.println(message);
             }
         }
-
-        //Zajmowanie sie przypadkiem SAY
-        private void doWhenSay(String text) {
-                board.say(text,this);
-                //output.println("Player "+playerNumber+" said something");
-                //tellOponents("Opponent "+playerNumber+" said something");
-            
-        }
-
-        
     }
+
+    // Obsługa komendy SAY
+    private void handleSayCommand(String command) {
+        String message = "Player " + playerNumber + ": " + command.substring(4).trim();
+        notifyAllPlayers(message);
+    }
+}
