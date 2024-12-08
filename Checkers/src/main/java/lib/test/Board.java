@@ -89,6 +89,7 @@ public class Board {
     public synchronized void say(String text, Player player) {
         if (player != currentPlayer) {
             System.out.println("Not your turn Player " + player.playerNumber);
+            player.output.println("NOT_YOUR_TURN");
         } else {
             // Wypisywanie ruchu gracza
             System.out.println(text);

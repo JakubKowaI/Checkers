@@ -1,0 +1,1 @@
+Program uruchamiamy komendą mvn exec:java w folderze Checkers, w którym znajduje się plik pom.xml

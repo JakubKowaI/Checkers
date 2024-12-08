@@ -48,10 +48,6 @@ public class Client {
             String message = input.nextLine();
             //Wysylanie wiadomosci do serwera
             client.tellServer(message);
-            //Wypisywanie odpowiedzi serwera (tylko chyba się bufferuje i na raz nie wypisuje wiecej niż jednej wiadomości)
-            // if(client.in.hasNextLine()){
-            //     System.out.println(client.in.nextLine());
-            // }
         }
         try{
         listenerThread.interrupt();

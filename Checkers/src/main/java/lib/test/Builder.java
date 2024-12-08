@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class Builder {
     public static void main(String[] args) {
-        System.out.println("Wybierz aplikacje do zbudowania:\n1. Server\n2.2Client");
+        System.out.println("Wybierz aplikacje do zbudowania:\n1. Server\n2. Client");
         Scanner input = new Scanner(System.in);
         int choice = input.nextInt();
         switch (choice) {
@@ -18,6 +18,7 @@ public class Builder {
                 System.out.println("Niepoprawny wybór");
                 break;
         }
+        input.close();
     }
     
 }
