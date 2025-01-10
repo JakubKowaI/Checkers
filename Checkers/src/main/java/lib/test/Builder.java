@@ -12,7 +12,8 @@ public class Builder {
                 new Server().run();
                 break;
             case 2:
-                new Client().run();
+                //Client client = new Client("localhost", 55555);
+                Client.main(args);
                 break;
             default:
                 System.out.println("Niepoprawny wybór");

@@ -11,10 +11,27 @@
     <properties>
         <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>23</maven.compiler.target>
+        <javafx.version>21</javafx.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <finalName>Checkers</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -24,6 +41,16 @@
                     <mainClass>lib.test.Builder</mainClass>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx.maven.plugin.version}</version>
+                <configuration>
+                    <mainClass>lib.test.Builder</mainClass>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -31,4 +58,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
