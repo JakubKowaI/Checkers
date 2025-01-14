@@ -1,19 +1,30 @@
 package lib.test;
 
+import lib.test.Player.Client;
+import lib.test.Server.BoardBuilder;
+
 import java.util.Scanner;
 
-public class Builder {
+public class Main {
     public static void main(String[] args) {
         System.out.println("Wybierz aplikacje do zbudowania:\n1. Server\n2. Client");
         Scanner input = new Scanner(System.in);
-        int choice = input.nextInt();
+        int choice = 0;
+        while(true) {
+            try {
+                choice = input.nextInt();
+                break;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         switch (choice) {
             case 1:
-                new Server().run();
+                new BoardBuilder("localhost", 55555);
                 break;
             case 2:
-                //Client client = new Client("localhost", 55555);
-                Client.main(args);
+                new Client().launchClient("localhost", 55555);
                 break;
             default:
                 System.out.println("Niepoprawny wybór");
@@ -21,5 +32,4 @@ public class Builder {
         }
         input.close();
     }
-    
 }
