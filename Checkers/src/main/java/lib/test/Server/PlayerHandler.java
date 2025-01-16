@@ -13,44 +13,57 @@ public class PlayerHandler extends Thread {
     private ObjectOutputStream out;
     private static int playerCount = 0;
     private int playerNumber;
+    private char playerColor; // Dodano: kolor gracza
     private Board board;
 
     public PlayerHandler(Socket accept, Board board) {
         this.socket = accept;
-        playerNumber = playerCount++;
         this.board = board;
+        this.playerNumber = playerCount++;
+        this.playerColor = board.assignColor(playerNumber); // Przypisanie koloru
     }
 
     public void run() {
         try {
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
+
+            // Informowanie klienta o przypisanym kolorze
+            out.writeObject(new Packet("ASSIGN_COLOR", String.valueOf(playerColor)));
+            out.flush();
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
-        String inputLine;
         while (true) {
             Packet packet;
             try {
                 packet = (Packet) in.readObject();
-            } catch (IOException e) {
-                //throw new RuntimeException(e);
-                continue;
-            } catch (ClassNotFoundException e) {
-                //throw new RuntimeException(e);
-                continue;
-            }
-            //if(false)packet = null;
-            if(packet.command.equals("QUIT")) {
+            } catch (IOException | ClassNotFoundException e) {
                 break;
-            }else if(packet.command.equals("SAY")) {
+            }
+
+            if (packet.command.equals("QUIT")) {
+                break;
+            } else if (packet.command.equals("SAY")) {
                 board.broadcast(packet);
             } else if (packet.command.equals("GET_BOARD")) {
                 try {
                     out.writeObject(new Packet(board.getBoard()));
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
+                }
+            } else if (packet.command.equals("MOVE")) {
+                if (board.isPlayerTurn(playerNumber)) { // Sprawdzenie, czy jest tura gracza
+                    if (board.isValidMove(packet)) { // Sprawdzenie legalności ruchu
+                        board.updateBoard(packet);
+                        board.nextTurn(); // Przejście do następnej tury
+                    } else {
+                        send(new Packet("INVALID_MOVE", "Ruch nie jest dozwolony!"));
+                    }
+                } else {
+                    send(new Packet("NOT_YOUR_TURN", "Nie Twoja tura!"));
                 }
             }
         }
@@ -60,7 +73,7 @@ public class PlayerHandler extends Thread {
             out.close();
             socket.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -68,7 +81,7 @@ public class PlayerHandler extends Thread {
         try {
             out.writeObject(packet);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 }
