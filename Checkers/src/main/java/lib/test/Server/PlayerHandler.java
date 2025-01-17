@@ -50,6 +50,7 @@ public class PlayerHandler extends Thread {
                 board.broadcast(packet);
             } else if (packet.command.equals("GET_BOARD")) {
                 try {
+                    //System.out.println("Sending board to player " + playerNumber);
                     out.writeObject(new Packet(board.getBoard()));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -77,9 +78,24 @@ public class PlayerHandler extends Thread {
         }
     }
 
+    public void move(Packet packet) {
+        board.isValidMove(packet);
+    }
+
     public void send(Packet packet) {
         try {
+//            if(packet.board != null) {
+//                System.out.println("Sending board to player " + playerNumber);
+//                for(int i = 0; i < 17; i++) {
+//                    for(int j = 0; j < 25; j++) {
+//                        System.out.print(packet.board[i][j]);
+//                    }
+//                    System.out.println();
+//                }
+//            }
+
             out.writeObject(packet);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

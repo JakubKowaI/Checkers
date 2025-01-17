@@ -3,9 +3,11 @@ package lib.test.Player;
 import javafx.application.Platform;
 import lib.test.Communication.Packet;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -20,7 +22,7 @@ public class ClientHandler implements Runnable {
             in = new ObjectInputStream(socket.getInputStream());
             outa = new ObjectOutputStream(socket.getOutputStream());
             this.client = client;
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -41,30 +43,50 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void getBoard() {
+    public void move(int x, int y, int x2, int y2) {
         try {
-            if (socket != null && !socket.isClosed()) {
-                outa.writeObject(new Packet("GET_BOARD", ""));
-                outa.flush(); // Ensure the packet is sent immediately
-            } else {
-                System.out.println("Socket is closed, cannot get board.");
-            }
-        } catch (Exception e) {
+            outa.writeObject(new Packet("MOVE", x, y, x2, y2));
+            outa.flush(); // Ensure the packet is sent immediately
+        } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Socket is closed, cannot move.");
         }
     }
 
+    public void getBoard() {
+        try {
+            System.out.println("Getting board");
+            outa.writeObject(new Packet("GET_BOARD", ""));
+            outa.flush(); // Ensure the packet is sent immediately
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Socket is closed, cannot get board.");
+        }
+    }
+
+    public void printBoard(char[][] board){
+        for(int i = 0; i < 17; i++){
+            for(int j = 0; j < 25; j++){
+                System.out.print(board[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    // In ClientHandler.java
     private void processObject(Object object) {
         if (object instanceof Packet) {
             Packet packet = (Packet) object;
             Platform.runLater(() -> {
-                if (packet.command == null) {
+                if (packet.board != null) {
+                    System.out.println("Received updated board:");
+                    printBoard(packet.board);
                     client.refreshBoard(packet.board);
                 } else {
                     if (packet.command.equals("SAY")) {
                         client.displayMessage(packet.message);
                     } else if (packet.command.equals("GET_BOARD")) {
-
+                        // Handle GET_BOARD command
                     }
                 }
             });
@@ -91,10 +113,30 @@ public class ClientHandler implements Runnable {
                     processObject(receivedObject);
                 }
             }
-        } catch (Exception e) {
+        } catch (SocketException e) {
             System.out.println("Connection closed or error occurred: " + e.getMessage());
+            closeConnection();
+        } catch (IOException e) {
+            System.out.println("IO Connection closed or error occurred: " + e.getMessage());
+            closeConnection();
+        } catch (ClassNotFoundException e) {
+            System.out.println("Class not found: " + e.getMessage());
+            closeConnection();
         } finally {
             stop();
+        }
+
+
+    }
+
+    private void closeConnection() {
+        try {
+            running = false;
+            if (in != null) in.close();
+            if (outa != null) outa.close();
+            if (socket != null) socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

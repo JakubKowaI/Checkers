@@ -15,6 +15,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import lib.test.Player.FXClasses.MyCircle;
 
 public class Client extends Application {
 
@@ -25,61 +26,164 @@ public class Client extends Application {
     VBox root = new VBox();
     private Stage primaryStage;
 
-    public void refreshBoard(char[][] board) {
-            root.getChildren().clear();
+
+
+//    public void refreshBoard(char[][] board) {
+//            root.getChildren().clear();
+//            new MyCircle(-1,-1).flushCircles();
+//
+//        for(int i=0;i<17;i++) {
+//            HBox row = new HBox();
+//            row.setAlignment(javafx.geometry.Pos.CENTER);
+//            row.setSpacing(5);
+//            root.getChildren().add(row);
+//            if (i != 0) {
+//                root.setMargin(row, new Insets(-1.5, 0, 0, 0));
+//            }
+//            for (int j = 0; j < 25; j++) {
+//                Circle circle = new Circle(10);
+//                circle.setFill(javafx.scene.paint.Color.WHITE);
+//                circle.setStroke(javafx.scene.paint.Color.BLACK);
+//                StackPane stack = new StackPane();
+//                stack.getChildren().add(circle);
+//
+//                MyCircle myCircle = null;
+//                switch (board[i][j]) {
+//                    case 'p':
+//                        //row.getChildren().add(circle);
+//                        break;
+//                    case 'r':
+//                        myCircle = new MyCircle(j, i);
+//                        myCircle.setFill(javafx.scene.paint.Color.RED);
+//                        break;
+//                    case 'b':
+//                        myCircle = new MyCircle(j, i);
+//                        myCircle.setFill(Color.BLUE);
+//                        break;
+//                    case 'y':
+//                        myCircle = new MyCircle(j, i);
+//                        myCircle.setFill(Color.YELLOW);
+//                        break;
+//                    case 'g':
+//                        myCircle = new MyCircle(j, i);
+//                        myCircle.setFill(Color.GREEN);
+//                        break;
+//                    case 'o':
+//                        myCircle = new MyCircle(j, i);
+//                        myCircle.setFill(Color.ORANGE);
+//                        break;
+//                    case 'v':
+//                        myCircle = new MyCircle(j, i);
+//                        myCircle.setFill(Color.PURPLE);
+//                        break;
+//                    default:
+//                        stack.getChildren().clear();
+//                }
+//                if(myCircle != null) {
+//                    myCircle.setStroke(Color.BLACK);
+//                    myCircle.addCircle();
+//                    stack.getChildren().add(myCircle);
+//                }
+//                row.getChildren().add(stack);
+//            }
+//        }
+//        primaryStage.sizeToScene();
+//    }
+    public void printBoard(char[][] board) {
         for(int i=0;i<17;i++) {
-            HBox row = new HBox();
-            row.setAlignment(javafx.geometry.Pos.CENTER);
-            row.setSpacing(5);
-            root.getChildren().add(row);
-            if (i != 0) {
-                root.setMargin(row, new Insets(-1.5, 0, 0, 0));
-            }
             for (int j = 0; j < 25; j++) {
+                System.out.print(board[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    public void refreshBoard(char[][] board) {
+        //root.getChildren().clear();
+        //printBoard(board);
+        background.getChildren().clear();
+        new MyCircle(-1,-1).flushCircles();
+
+        for(int i=0;i<17;i++) {
+            //HBox row = new HBox();
+            //row.setAlignment(javafx.geometry.Pos.CENTER);
+            //row.setSpacing(5);
+            //root.getChildren().add(row);
+//            if (i != 0) {
+//                root.setMargin(row, new Insets(-1.5, 0, 0, 0));
+//            }
+            for (int j = 0; j < 25; j++) {
+                MyCircle circle = new MyCircle(j, i);
+                circle.addCircle();
+                circle.setFill(javafx.scene.paint.Color.WHITE);
+                circle.setStroke(javafx.scene.paint.Color.BLACK);
+                //StackPane stack = new StackPane();
+                //stack.getChildren().add(circle);
+
+                MyCircle myCircle = null;
                 switch (board[i][j]) {
                     case 'p':
-                        Circle circle = new Circle(10);
-                        circle.setFill(javafx.scene.paint.Color.WHITE);
-                        circle.setStroke(javafx.scene.paint.Color.BLACK);
-                        row.getChildren().add(circle);
+                        //row.getChildren().add(circle);
+                        background.getChildren().add(circle);
+                        circle.setCenterX((j*20)+10);
+                        circle.setCenterY((i*20)+10);
                         break;
                     case 'r':
-                        Circle circle2 = new Circle(10);
-                        circle2.setFill(javafx.scene.paint.Color.RED);
-                        circle2.setStroke(javafx.scene.paint.Color.BLACK);
-                        row.getChildren().add(circle2);
+                        background.getChildren().add(circle);
+                        circle.setCenterX((j*20)+10);
+                        circle.setCenterY((i*20)+10);
+                        myCircle = new MyCircle(j, i);
+                        myCircle.setFill(javafx.scene.paint.Color.RED);
                         break;
                     case 'b':
-                        Circle circle3 = new Circle(10);
-                        circle3.setFill(javafx.scene.paint.Color.BLUE);
-                        circle3.setStroke(javafx.scene.paint.Color.BLACK);
-                        row.getChildren().add(circle3);
+                        background.getChildren().add(circle);
+                        circle.setCenterX((j*20)+10);
+                        circle.setCenterY((i*20)+10);
+                        myCircle = new MyCircle(j, i);
+                        myCircle.setFill(Color.BLUE);
                         break;
                     case 'y':
-                        Circle circle4 = new Circle(10);
-                        circle4.setFill(javafx.scene.paint.Color.YELLOW);
-                        circle4.setStroke(javafx.scene.paint.Color.BLACK);
-                        row.getChildren().add(circle4);
+                        background.getChildren().add(circle);
+                        circle.setCenterX((j*20)+10);
+                        circle.setCenterY((i*20)+10);
+                        myCircle = new MyCircle(j, i);
+                        myCircle.setFill(Color.YELLOW);
                         break;
                     case 'g':
-                        Circle circle5 = new Circle(10);
-                        circle5.setFill(javafx.scene.paint.Color.GREEN);
-                        circle5.setStroke(javafx.scene.paint.Color.BLACK);
-                        row.getChildren().add(circle5);
+                        background.getChildren().add(circle);
+                        circle.setCenterX((j*20)+10);
+                        circle.setCenterY((i*20)+10);
+                        myCircle = new MyCircle(j, i);
+                        myCircle.setFill(Color.GREEN);
                         break;
                     case 'o':
-                        Circle circle6 = new Circle(10);
-                        circle6.setFill(javafx.scene.paint.Color.ORANGE);
-                        circle6.setStroke(javafx.scene.paint.Color.BLACK);
-                        row.getChildren().add(circle6);
+                        background.getChildren().add(circle);
+                        circle.setCenterX((j*20)+10);
+                        circle.setCenterY((i*20)+10);
+                        myCircle = new MyCircle(j, i);
+                        myCircle.setFill(Color.ORANGE);
                         break;
                     case 'v':
-                        Circle circle7 = new Circle(10);
-                        circle7.setFill(Color.VIOLET);
-                        circle7.setStroke(javafx.scene.paint.Color.BLACK);
-                        row.getChildren().add(circle7);
+                        background.getChildren().add(circle);
+                        circle.setCenterX((j*20)+10);
+                        circle.setCenterY((i*20)+10);
+                        myCircle = new MyCircle(j, i);
+                        myCircle.setFill(Color.PURPLE);
+                        break;
+                    default:
+                        //stack.getChildren().clear();
                         break;
                 }
+                if(myCircle != null) {
+                    background.getChildren().add(myCircle);
+                    myCircle.setStroke(Color.BLACK);
+                    myCircle.addCircle();
+                    //background.getChildren().add(circle);
+                    myCircle.setCenterX((j*20)+10);
+                    myCircle.setCenterY((i*20)+10);
+                    //stack.getChildren().add(myCircle);
+                }
+                //row.getChildren().add(stack);
             }
         }
         primaryStage.sizeToScene();
@@ -97,17 +201,18 @@ public class Client extends Application {
         // Initialize ClientHandler using static fields
         doer = new ClientHandler(serverAddress, port, this);
         new Thread(doer).start();
+        new MyCircle(0,0).setClient(this);
+        background = new Pane();
         doer.getBoard();
         //doer.say("Hello"+this);
 
         primaryStage = mainStage;
         primaryStage.setTitle("Checkers");
-        background = new Pane();
 //        Button btn = new Button();
 //        btn.setText("Click Me");
 //        btn.setOnAction(event -> doer.say("Hello from "+ this));
         //root.getChildren().add(btn);
-        primaryStage.setScene(new Scene(root, 500, 300));
+        primaryStage.setScene(new Scene(background, 500, 300));
         primaryStage.sizeToScene();
         primaryStage.show();
 
@@ -134,5 +239,9 @@ public class Client extends Application {
 
     public void displayMessage(String message) {
         System.out.println(message);
+    }
+
+    public void sendMove(int x, int y, int x1, int y1) {
+        doer.move(x, y, x1, y1);
     }
 }

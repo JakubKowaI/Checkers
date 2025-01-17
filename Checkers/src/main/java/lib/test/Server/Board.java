@@ -33,6 +33,14 @@ public class Board {
             e.printStackTrace();
         }
     }
+    public void printBoard(char[][] mboard) {
+        for (int i = 0; i < 17; i++) {
+            for (int j = 0; j < 25; j++) {
+                System.out.print(mboard[i][j]);
+            }
+            System.out.println();
+        }
+    }
 
     public char assignColor(int playerNumber) {
         return colors[playerNumber]; // Przypisanie koloru graczowi
@@ -47,19 +55,27 @@ public class Board {
         broadcast(new Packet("TURN", "Tura gracza: " + (currentTurn + 1)));
     }
 
-    public boolean isValidMove(Packet movePacket) {
-        // Na razie domyślna walidacja
+    public Boolean isValidMove(Packet packet) {
+        // Uzupełnienie później
+        // Walidacja ruchu
         return true;
     }
 
-    public void updateBoard(Packet movePacket) {
+    public void updateBoard(Packet packet) {
         // Uzupełnienie później
+         printBoard(board);
+         board[packet.newY][packet.newX] = board[packet.oldY][packet.oldX];
+         board[packet.oldY][packet.oldX] = 'p';
+         printBoard(board);
+         //System.out.println("Moved from " + packet.oldX + " " + packet.oldY+" ("+board[packet.newY][packet.newX]+") " + " to " + packet.newX + " " + packet.newY);
+         broadcast(new Packet(board));
     }
 
     // Metoda zwracająca planszę (ważna dla PlayerHandler)
     public char[][] getBoard() {
         return board;
     }
+
     public void resetBoard() {
         for (int i = 0; i < 17; i++) {
             for (int j = 0; j < 25; j++) {
@@ -102,6 +118,8 @@ public class Board {
 
     public void broadcast(Packet packet) {
         for (PlayerHandler player : playerHandler) {
+            if(player==null) System.out.println("Player is null");
+            System.out.println("Sending packet to player");
             player.send(packet);
         }
     }
