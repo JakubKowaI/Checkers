@@ -56,6 +56,8 @@ public class PlayerHandler extends Thread {
                 try {
                     //System.out.println("Sending board to player " + playerNumber);
                     out.writeObject(new Packet(board.getBoard()));
+                    out.flush();
+                    out.reset();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
