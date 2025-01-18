@@ -1,6 +1,7 @@
 package lib.test.Player.FXClasses;
 
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import lib.test.Player.Client;
 
@@ -33,19 +34,23 @@ public class MyCircle extends Circle {
 
         // Press event: capture the offset between mouse and circle center
         this.setOnMousePressed(event -> {
-            lastX =  this.getCenterX();
-            lastY =  this.getCenterY();
-            offsetX[0] = event.getSceneX() - this.getCenterX();
-            offsetY[0] = event.getSceneY() - this.getCenterY();
+            if(isColor(this.getFill())) return;
+                lastX = this.getCenterX();
+                lastY = this.getCenterY();
+                offsetX[0] = event.getSceneX() - this.getCenterX();
+                offsetY[0] = event.getSceneY() - this.getCenterY();
+
         });
 
         // Drag event: update the circle's position
         this.setOnMouseDragged(event -> {
+            if(!isColor(this.getFill())) return;
             this.setCenterX(event.getSceneX() - offsetX[0]);
             this.setCenterY(event.getSceneY() - offsetY[0]);
         });
 
         this.setOnMouseReleased(event -> {
+            if(!isColor(this.getFill())) return;
             //boolean collisionDetected = false;
             int collisions = 0;
             int targetX = 0;
@@ -72,6 +77,25 @@ public class MyCircle extends Circle {
                 this.setCenterY(lastY);
             //}
         });
+    }
+
+    private boolean isColor(Paint fill) {
+        switch (client.myColor) {
+            case 'r':
+                return fill.equals(Color.RED);
+            case 'b':
+                return fill.equals(Color.BLUE);
+            case 'y':
+                return fill.equals(Color.YELLOW);
+            case 'g':
+                return fill.equals(Color.GREEN);
+            case 'o':
+                return fill.equals(Color.ORANGE);
+            case 'v':
+                return fill.equals(Color.PURPLE);
+            default:
+                return false;
+        }
     }
 
     private boolean isColliding(Circle c1, Circle c2) {

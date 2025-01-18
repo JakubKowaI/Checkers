@@ -51,14 +51,13 @@ public class Board {
     }
 
     public void nextTurn() {
+        //playerHandler[currentTurn].validate = new Validator(); // Reset walidatora
         currentTurn = (currentTurn + 1) % playerCount; // Przejście do kolejnej tury
         broadcast(new Packet("TURN", "Tura gracza: " + (currentTurn + 1)));
     }
 
     public Boolean isValidMove(Packet packet) {
-        // Uzupełnienie później
-        // Walidacja ruchu
-        return true;
+        return new Validator().isMoveValid(packet, board);
     }
 
     public void updateBoard(Packet packet) {
@@ -68,7 +67,7 @@ public class Board {
          board[packet.oldY][packet.oldX] = 'p';
          printBoard(board);
          //System.out.println("Moved from " + packet.oldX + " " + packet.oldY+" ("+board[packet.newY][packet.newX]+") " + " to " + packet.newX + " " + packet.newY);
-         broadcast(new Packet(board));
+         //broadcast(new Packet(board));
     }
 
     // Metoda zwracająca planszę (ważna dla PlayerHandler)
@@ -89,24 +88,24 @@ public class Board {
         fillFromBottom(16, 12);
         switch (playerCount) {
             case 2:
-                fillTriangleTop(0, 12, 0 + 4, 'b');
-                fillTriangleBottom(16, 12, 16 - 4, 'r');
+                fillTriangleTop(0, 12, 0 + 4, 'r');
+                fillTriangleBottom(16, 12, 16 - 4, 'b');
                 break;
             case 3:
                 fillTriangleTop(0, 12, 0 + 4, 'r');
-                fillTriangleTop(9, 3, 9 + 4, 'g');
-                fillTriangleTop(9, 21, 9 + 4, 'b');
+                fillTriangleTop(9, 3, 9 + 4, 'b');
+                fillTriangleTop(9, 21, 9 + 4, 'g');
                 break;
             case 4:
-                fillTriangleTop(9, 3, 9 + 4, 'g');
+                fillTriangleTop(9, 3, 9 + 4, 'r');
                 fillTriangleTop(9, 21, 9 + 4, 'b');
-                fillTriangleBottom(7, 3, 7 - 4, 'r');
+                fillTriangleBottom(7, 3, 7 - 4, 'g');
                 fillTriangleBottom(7, 21, 7 - 4, 'y');
                 break;
             case 6:
                 fillTriangleTop(0, 12, 0 + 4, 'r');
-                fillTriangleBottom(16, 12, 16 - 4, 'g');
-                fillTriangleTop(9, 3, 9 + 4, 'b');
+                fillTriangleBottom(16, 12, 16 - 4, 'b');
+                fillTriangleTop(9, 3, 9 + 4, 'g');
                 fillTriangleTop(9, 21, 9 + 4, 'y');
                 fillTriangleBottom(7, 3, 7 - 4, 'o');
                 fillTriangleBottom(7, 21, 7 - 4, 'v');

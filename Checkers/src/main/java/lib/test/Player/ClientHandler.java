@@ -47,6 +47,7 @@ public class ClientHandler implements Runnable {
         try {
             outa.writeObject(new Packet("MOVE", x, y, x2, y2));
             outa.flush(); // Ensure the packet is sent immediately
+            getBoard();
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Socket is closed, cannot move.");
@@ -85,8 +86,12 @@ public class ClientHandler implements Runnable {
                 } else {
                     if (packet.command.equals("SAY")) {
                         client.displayMessage(packet.message);
-                    } else if (packet.command.equals("GET_BOARD")) {
-                        // Handle GET_BOARD command
+                    } else if (packet.command.equals("ASSIGN_COLOR")) {
+                        client.setPlayerColor(packet.color);
+                    } else if (packet.command.equals("INVALID_MOVE")) {
+                        client.displayMessage(packet.message);
+                    } else if (packet.command.equals("NOT_YOUR_TURN")) {
+                        client.displayMessage(packet.message);
                     }
                 }
             });

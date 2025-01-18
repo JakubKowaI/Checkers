@@ -1,6 +1,7 @@
 package lib.test.Server;
 
 import lib.test.Communication.Packet;
+import lib.test.Server.Validator;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,6 +16,9 @@ public class PlayerHandler extends Thread {
     private int playerNumber;
     private char playerColor; // Dodano: kolor gracza
     private Board board;
+    public Validator validate = new Validator();
+    int lastX = -1;
+    int lastY = -1;
 
     public PlayerHandler(Socket accept, Board board) {
         this.socket = accept;
@@ -29,7 +33,7 @@ public class PlayerHandler extends Thread {
             in = new ObjectInputStream(socket.getInputStream());
 
             // Informowanie klienta o przypisanym kolorze
-            out.writeObject(new Packet("ASSIGN_COLOR", String.valueOf(playerColor)));
+            out.writeObject(new Packet("ASSIGN_COLOR", playerColor));
             out.flush();
 
         } catch (IOException e) {
@@ -59,7 +63,12 @@ public class PlayerHandler extends Thread {
                 if (board.isPlayerTurn(playerNumber)) { // Sprawdzenie, czy jest tura gracza
                     if (board.isValidMove(packet)) { // Sprawdzenie legalności ruchu
                         board.updateBoard(packet);
-                        board.nextTurn(); // Przejście do następnej tury
+                        if(!validate.hasPossibleMoves(packet, board.getBoard(), lastX, lastY)) {
+                            board.nextTurn(); // Przejście do następnej tury
+                        }
+                            validate = new Validator();
+                            lastX = packet.oldX;
+                            lastY =  packet.oldY;
                     } else {
                         send(new Packet("INVALID_MOVE", "Ruch nie jest dozwolony!"));
                     }

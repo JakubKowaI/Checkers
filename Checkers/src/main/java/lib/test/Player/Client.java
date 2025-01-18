@@ -25,6 +25,7 @@ public class Client extends Application {
     private ClientHandler doer;
     VBox root = new VBox();
     private Stage primaryStage;
+    public char myColor;
 
 
 
@@ -243,5 +244,9 @@ public class Client extends Application {
 
     public void sendMove(int x, int y, int x1, int y1) {
         doer.move(x, y, x1, y1);
+    }
+
+    public void setPlayerColor(char color) {
+        this.myColor = color;
     }
 }

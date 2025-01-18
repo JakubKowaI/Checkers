@@ -9,10 +9,16 @@ public class Packet implements Serializable {
     public String message;
     public char[][] board = null;
     public int oldX, oldY, newX, newY;
+    public char color;
 
     public Packet(String command, String message) {
         this.command = command;
         this.message = message;
+    }
+
+    public Packet(String command, char color) {
+        this.command = command;
+        this.color = color;
     }
 
     public Packet(char[][] board) {
