@@ -228,6 +228,16 @@ public class Client extends Application {
             }
         });
 
+        primaryStage.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.E) {
+                // Define the action to be performed when space is pressed
+                doer.getBoard();
+                System.out.println("E key was pressed");
+                // Example action: send a message to the server
+                //doer.say("Space key was pressed");
+            }
+        });
+
         // Call methods on doer
         //doer.say("Hello");
     }

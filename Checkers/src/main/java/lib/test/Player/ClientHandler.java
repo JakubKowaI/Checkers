@@ -45,12 +45,25 @@ public class ClientHandler implements Runnable {
 
     public void move(int x, int y, int x2, int y2) {
         try {
+            outa.reset();
             outa.writeObject(new Packet("MOVE", x, y, x2, y2));
             outa.flush(); // Ensure the packet is sent immediately
-            getBoard();
+            outa.reset();
+            //getBoard();
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Socket is closed, cannot move.");
+        }
+    }
+    public void giveTurn() {
+        try {
+            outa.reset();
+            outa.writeObject(new Packet("GIVE_TURN", ""));
+            outa.flush(); // Ensure the packet is sent immediately
+            outa.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Socket is closed, cannot give turn.");
         }
     }
 
@@ -80,7 +93,7 @@ public class ClientHandler implements Runnable {
             Platform.runLater(() -> {
                 if (packet.board != null) {
                     System.out.println("Otrzymano zaktualizowaną planszę:");
-                    printBoard(packet.board);
+                    //printBoard(packet.board);
                     client.refreshBoard(packet.board);
                 } else {
                     if (packet.command.equals("SAY")) {

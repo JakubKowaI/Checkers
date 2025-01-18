@@ -17,8 +17,8 @@ public class MyCircle extends Circle {
     final double[] offsetX = {0};
     final double[] offsetY = {0};
 
-    public double lastX = 0;
-    public double lastY = 0;
+    private double lastX = 0;
+    private double lastY = 0;
 
     public void setClient(Client client) {
         this.client = client;
@@ -68,7 +68,7 @@ public class MyCircle extends Circle {
             }
             if(collisions == 1){
                 //collisionDetected = true;
-                System.out.println("Collision detected");
+                //System.out.println("Collision detected");
                 client.sendMove(this.x, this.y, targetX, targetY);
             }
 

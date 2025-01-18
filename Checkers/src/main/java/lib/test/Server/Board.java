@@ -62,13 +62,13 @@ public class Board {
 
     public void updateBoard(Packet packet) {
         // Uzupełnienie później
-         printBoard(board);
+         //printBoard(board);
          board[packet.newY][packet.newX] = board[packet.oldY][packet.oldX];
          board[packet.oldY][packet.oldX] = 'p';
 
-         printBoard(board);
+         //printBoard(board);
          //System.out.println("Moved from " + packet.oldX + " " + packet.oldY+" ("+board[packet.newY][packet.newX]+") " + " to " + packet.newX + " " + packet.newY);
-         //broadcast(new Packet(board));
+         broadcast(new Packet(board));
     }
 
     // Metoda zwracająca planszę (ważna dla PlayerHandler)

@@ -55,6 +55,7 @@ public class PlayerHandler extends Thread {
                 board.broadcast(packet);
             } else if (packet.command.equals("GET_BOARD")) {
                 try {
+                    out.reset();
                     out.writeObject(new Packet(board.getBoard()));
                     out.flush();
                     out.reset();
@@ -65,15 +66,24 @@ public class PlayerHandler extends Thread {
                 if (board.isPlayerTurn(playerNumber)) { // Sprawdzenie, czy jest tura gracza
                     if (board.isValidMove(packet)) { // Sprawdzenie legalności ruchu
                         board.updateBoard(packet); // Aktualizacja planszy
-                        board.broadcast(new Packet(board.getBoard())); // Wysłanie planszy do wszystkich
+                        //board.broadcast(new Packet(board.getBoard())); // Wysłanie planszy do wszystkich
 
                         // Koniec tury gracza
                         board.nextTurn();
                     } else {
                         send(new Packet("INVALID_MOVE", "Ruch nie jest dozwolony!"));
+                        board.broadcast(new Packet(board.getBoard()));
                     }
                 } else {
                     send(new Packet("NOT_YOUR_TURN", "Nie Twoja tura!"));
+                    board.broadcast(new Packet(board.getBoard()));
+                }
+            } else if (packet.command.equals("GIVE_TURN")) {
+                if (board.isPlayerTurn(playerNumber)) {
+                    board.nextTurn();
+                } else {
+                    send(new Packet("NOT_YOUR_TURN", "Nie Twoja tura!"));
+                    board.broadcast(new Packet(board.getBoard()));
                 }
             }
         }
@@ -102,9 +112,10 @@ public class PlayerHandler extends Thread {
 //                    System.out.println();
 //                }
 //            }
-
+            out.reset();
             out.writeObject(packet);
             out.flush();
+            out.reset();
         } catch (IOException e) {
             e.printStackTrace();
         }
