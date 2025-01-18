@@ -20,6 +20,11 @@ public class Packet implements Serializable {
         this.command = command;
         this.color = color;
     }
+    //
+    public Packet(String command, char[][] board) {
+        this.command = command;
+        this.board = board;
+    }
 
     public Packet(char[][] board) {
         this.board = board;
@@ -36,3 +41,9 @@ public class Packet implements Serializable {
     public Packet(int startX, int startY, int endX, int endY) {
     }
 }
+
+
+
+
+
+

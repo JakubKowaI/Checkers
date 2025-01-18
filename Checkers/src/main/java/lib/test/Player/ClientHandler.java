@@ -74,13 +74,12 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // In ClientHandler.java
     private void processObject(Object object) {
         if (object instanceof Packet) {
             Packet packet = (Packet) object;
             Platform.runLater(() -> {
                 if (packet.board != null) {
-                    System.out.println("Received updated board:");
+                    System.out.println("Otrzymano zaktualizowaną planszę:");
                     printBoard(packet.board);
                     client.refreshBoard(packet.board);
                 } else {
@@ -92,11 +91,14 @@ public class ClientHandler implements Runnable {
                         client.displayMessage(packet.message);
                     } else if (packet.command.equals("NOT_YOUR_TURN")) {
                         client.displayMessage(packet.message);
+                    } else if (packet.command.equals("TURN")) {
+                        client.displayMessage(packet.message);
                     }
                 }
             });
         }
     }
+
 
     public void stop() {
         running = false;

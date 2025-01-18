@@ -27,6 +27,7 @@ public class PlayerHandler extends Thread {
         this.playerColor = board.assignColor(playerNumber); // Przypisanie koloru
     }
 
+    @Override
     public void run() {
         try {
             out = new ObjectOutputStream(socket.getOutputStream());
@@ -54,7 +55,6 @@ public class PlayerHandler extends Thread {
                 board.broadcast(packet);
             } else if (packet.command.equals("GET_BOARD")) {
                 try {
-                    //System.out.println("Sending board to player " + playerNumber);
                     out.writeObject(new Packet(board.getBoard()));
                     out.flush();
                     out.reset();
@@ -64,13 +64,11 @@ public class PlayerHandler extends Thread {
             } else if (packet.command.equals("MOVE")) {
                 if (board.isPlayerTurn(playerNumber)) { // Sprawdzenie, czy jest tura gracza
                     if (board.isValidMove(packet)) { // Sprawdzenie legalności ruchu
-                        board.updateBoard(packet);
-                        if(!validate.hasPossibleMoves(packet, board.getBoard(), lastX, lastY)) {
-                            board.nextTurn(); // Przejście do następnej tury
-                        }
-                            validate = new Validator();
-                            lastX = packet.oldX;
-                            lastY =  packet.oldY;
+                        board.updateBoard(packet); // Aktualizacja planszy
+                        board.broadcast(new Packet(board.getBoard())); // Wysłanie planszy do wszystkich
+
+                        // Koniec tury gracza
+                        board.nextTurn();
                     } else {
                         send(new Packet("INVALID_MOVE", "Ruch nie jest dozwolony!"));
                     }

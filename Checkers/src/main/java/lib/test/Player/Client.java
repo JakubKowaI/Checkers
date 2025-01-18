@@ -102,7 +102,7 @@ public class Client extends Application {
     public void refreshBoard(char[][] board) {
         //root.getChildren().clear();
         //printBoard(board);
-        background.getChildren().clear();
+        this.background.getChildren().clear();
         new MyCircle(-1,-1).flushCircles();
 
         for(int i=0;i<17;i++) {

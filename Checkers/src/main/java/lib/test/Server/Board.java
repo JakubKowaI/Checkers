@@ -51,7 +51,7 @@ public class Board {
     }
 
     public void nextTurn() {
-        //playerHandler[currentTurn].validate = new Validator(); // Reset walidatora
+        playerHandler[currentTurn].validate = new Validator(); // Reset walidatora
         currentTurn = (currentTurn + 1) % playerCount; // Przejście do kolejnej tury
         broadcast(new Packet("TURN", "Tura gracza: " + (currentTurn + 1)));
     }
@@ -65,6 +65,7 @@ public class Board {
          printBoard(board);
          board[packet.newY][packet.newX] = board[packet.oldY][packet.oldX];
          board[packet.oldY][packet.oldX] = 'p';
+
          printBoard(board);
          //System.out.println("Moved from " + packet.oldX + " " + packet.oldY+" ("+board[packet.newY][packet.newX]+") " + " to " + packet.newX + " " + packet.newY);
          //broadcast(new Packet(board));
