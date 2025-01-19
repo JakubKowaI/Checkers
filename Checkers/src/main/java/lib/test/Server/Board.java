@@ -1,7 +1,8 @@
 package lib.test.Server;
 
 import lib.test.Communication.Packet;
-
+import java.util.LinkedList;
+import java.util.Queue;
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -62,26 +63,62 @@ public class Board {
         board[packet.oldY][packet.oldX] = 'p';
         broadcast(new Packet(board));
     }
-
     public boolean hasMoreJumps(int x, int y) {
-        // Sprawdzenie wszystkich możliwych kierunków dla kolejnych skoków
-        int[][] directions = {{-2, -2}, {-2, 2}, {2, -2}, {2, 2}};
-        for (int[] dir : directions) {
-            int newX = x + dir[0];
-            int newY = y + dir[1];
-            int midX = x + dir[0] / 2;
-            int midY = y + dir[1] / 2;
+        // Kolejka do BFS i zbiór odwiedzonych współrzędnych
+        Queue<int[]> coordinateQueue = new LinkedList<>();
+        boolean[][] visited = new boolean[board.length][board[0].length];
 
-            // Sprawdź, czy nowa pozycja jest w granicach planszy
-            if (newX >= 0 && newX < board[0].length && newY >= 0 && newY < board.length) {
-                // Sprawdź, czy miejsce docelowe jest puste, a pozycja środkowa zajęta
-                if (board[newY][newX] == ' ' && board[midY][midX] != ' ' && board[midY][midX] != 'p') {
-                    return true; // Możliwy kolejny skok
+        // Dodaj początkową pozycję do kolejki
+        coordinateQueue.add(new int[]{x, y});
+        visited[y][x] = true;
+
+        // Kierunki, w których można wykonywać skoki
+        int[][] directions = {{-2, -2}, {-2, 2}, {2, -2}, {2, 2}};
+
+        while (!coordinateQueue.isEmpty()) {
+            int[] current = coordinateQueue.poll();
+            int currentX = current[0];
+            int currentY = current[1];
+
+            // Sprawdź wszystkie możliwe kierunki skoku
+            for (int[] dir : directions) {
+                int newX = currentX + dir[0];
+                int newY = currentY + dir[1];
+                int midX = currentX + dir[0] / 2;
+                int midY = currentY + dir[1] / 2;
+
+                // Sprawdź, czy pole docelowe i pośrednie są w granicach planszy
+                if (newX >= 0 && newX < board[0].length && newY >= 0 && newY < board.length &&
+                        midX >= 0 && midX < board[0].length && midY >= 0 && midY < board.length) {
+
+                    // Sprawdź, czy miejsce docelowe jest puste
+                    if (board[newY][newX] == ' ') {
+                        // Sprawdź, czy na polu pośrednim jest pionek przeciwnika
+                        if (board[midY][midX] != ' ' && board[midY][midX] != 'p') {
+
+                            // Jeśli współrzędne docelowe już odwiedzono, pomiń
+                            if (visited[newY][newX]) {
+                                continue;
+                            }
+
+                            // Dodaj pole docelowe do odwiedzonych i kolejki
+                            visited[newY][newX] = true;
+                            coordinateQueue.add(new int[]{newX, newY});
+
+                            // Możliwy kolejny skok, więc zwróć true
+                            return true;
+                        }
+                    }
                 }
             }
         }
-        return false; // Brak możliwych kolejnych skoków
+
+        // Jeśli nie znaleziono kolejnych skoków, zwróć false
+        return false;
     }
+
+
+
 
 
     public char[][] getBoard() {

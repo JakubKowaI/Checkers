@@ -18,14 +18,16 @@ import javafx.stage.Stage;
 import lib.test.Player.FXClasses.MyCircle;
 
 public class Client extends Application {
-
+//getboarddoer funkcja ktora wywoluje doer
     private static String serverAddress;
     private static int port;
     Pane background;
-    private ClientHandler doer;
+    public ClientHandler doer;
     VBox root = new VBox();
     private Stage primaryStage;
     public char myColor;
+
+
 
 
 
