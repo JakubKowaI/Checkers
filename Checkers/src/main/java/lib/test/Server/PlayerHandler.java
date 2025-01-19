@@ -13,12 +13,11 @@ public class PlayerHandler extends Thread {
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private static int playerCount = 0;
-    private int playerNumber;
-    private char playerColor; // Dodano: kolor gracza
-    private Board board;
+    private final int playerNumber;
+    private final char playerColor; // Kolor gracza
+    private final Board board;
+
     public Validator validate = new Validator();
-    int lastX = -1;
-    int lastY = -1;
 
     public PlayerHandler(Socket accept, Board board) {
         this.socket = accept;
@@ -34,88 +33,83 @@ public class PlayerHandler extends Thread {
             in = new ObjectInputStream(socket.getInputStream());
 
             // Informowanie klienta o przypisanym kolorze
-            out.writeObject(new Packet("ASSIGN_COLOR", playerColor));
-            out.flush();
+            send(new Packet("ASSIGN_COLOR", playerColor));
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        while (true) {
-            Packet packet;
-            try {
-                packet = (Packet) in.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                break;
-            }
-
-            if (packet.command.equals("QUIT")) {
-                break;
-            } else if (packet.command.equals("SAY")) {
-                board.broadcast(packet);
-            } else if (packet.command.equals("GET_BOARD")) {
-                try {
-                    out.reset();
-                    out.writeObject(new Packet(board.getBoard()));
-                    out.flush();
-                    out.reset();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else if (packet.command.equals("MOVE")) {
-                if (board.isPlayerTurn(playerNumber)) { // Sprawdzenie, czy jest tura gracza
-                    if (board.isValidMove(packet)) { // Sprawdzenie legalności ruchu
-                        board.updateBoard(packet); // Aktualizacja planszy
-                        //board.broadcast(new Packet(board.getBoard())); // Wysłanie planszy do wszystkich
-
-                        // Koniec tury gracza
-                        board.nextTurn();
-                    } else {
-                        send(new Packet("INVALID_MOVE", "Ruch nie jest dozwolony!"));
-                        board.broadcast(new Packet(board.getBoard()));
-                    }
-                } else {
-                    send(new Packet("NOT_YOUR_TURN", "Nie Twoja tura!"));
-                    board.broadcast(new Packet(board.getBoard()));
-                }
-            } else if (packet.command.equals("GIVE_TURN")) {
-                if (board.isPlayerTurn(playerNumber)) {
-                    board.nextTurn();
-                } else {
-                    send(new Packet("NOT_YOUR_TURN", "Nie Twoja tura!"));
-                    board.broadcast(new Packet(board.getBoard()));
+            while (true) {
+                Packet packet = (Packet) in.readObject();
+                switch (packet.command) {
+                    case "QUIT":
+                        return; // Zakończenie gry dla gracza
+                    case "SAY":
+                        board.broadcast(packet);
+                        break;
+                    case "GET_BOARD":
+                        send(new Packet(board.getBoard())); // Wysłanie planszy
+                        break;
+                    case "MOVE":
+                        handleMove(packet);
+                        break;
+                    case "GIVE_TURN":
+                        handleGiveTurn();
+                        break;
+                    default:
+                        send(new Packet("ERROR", "Nieznane polecenie: " + packet.command));
                 }
             }
-        }
-
-        try {
-            in.close();
-            out.close();
-            socket.close();
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            closeConnections();
         }
     }
 
-    public void move(Packet packet) {
-        board.isValidMove(packet);
+    private void handleMove(Packet packet) {
+        if (!board.isPlayerTurn(playerNumber)) {
+            send(new Packet("NOT_YOUR_TURN", "To nie jest Twoja tura!"));
+            return;
+        }
+
+        if (board.isValidMove(packet)) {
+            board.updateBoard(packet);
+
+            // Rozróżnienie ruchu pojedynczego i skoku
+            boolean isJump = Math.abs(packet.newX - packet.oldX) > 1 || Math.abs(packet.newY - packet.oldY) > 1;
+
+            if (isJump && board.hasMoreJumps(packet.newX, packet.newY)) {
+                // Wielokrotny skok - gracz może kontynuować
+                send(new Packet("MORE_JUMPS", "Możesz kontynuować skoki."));
+            } else {
+                // Ruch pojedynczy lub brak kolejnych skoków - zakończenie tury
+                board.nextTurn();
+            }
+        } else {
+            send(new Packet("INVALID_MOVE", "Nieprawidłowy ruch. Spróbuj ponownie."));
+        }
+    }
+
+    private void handleGiveTurn() {
+        if (board.isPlayerTurn(playerNumber)) {
+            board.nextTurn();
+        } else {
+            send(new Packet("NOT_YOUR_TURN", "Nie Twoja tura!"));
+        }
     }
 
     public void send(Packet packet) {
         try {
-//            if(packet.board != null) {
-//                System.out.println("Sending board to player " + playerNumber);
-//                for(int i = 0; i < 17; i++) {
-//                    for(int j = 0; j < 25; j++) {
-//                        System.out.print(packet.board[i][j]);
-//                    }
-//                    System.out.println();
-//                }
-//            }
             out.reset();
             out.writeObject(packet);
             out.flush();
-            out.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void closeConnections() {
+        try {
+            in.close();
+            out.close();
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

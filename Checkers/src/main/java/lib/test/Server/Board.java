@@ -2,43 +2,40 @@ package lib.test.Server;
 
 import lib.test.Communication.Packet;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 
 public class Board {
-    ServerSocket listener;
-    PlayerHandler[] playerHandler;
-    char[][] board = new char[17][25];
-    int playerCount;
-    private int currentTurn = 0; // Dodano: numer gracza, którego jest tura
+    private ServerSocket listener; // Poprawione odniesienie do ServerSocket
+    private PlayerHandler[] playerHandler; // Tablica handlerów graczy
+    private final char[][] board = new char[17][25]; // Plansza gry
+    private final int playerCount; // Liczba graczy
+    private int currentTurn = 0; // Tura gracza
 
     private final char[] colors = {'r', 'b', 'g', 'y', 'o', 'v'}; // Kolory graczy
 
+    // Konstruktor
     public Board(int port, int playerCount) {
-        resetBoard();
         this.playerCount = playerCount;
+        this.playerHandler = new PlayerHandler[playerCount]; // Inicjalizacja tablicy handlerów
+        resetBoard();
         fillBoard();
 
         try {
-            playerHandler = new PlayerHandler[playerCount];
-            listener = new ServerSocket(port);
+            this.listener = new ServerSocket(port); // Tworzenie gniazda serwera
             int i = 0;
+
             while (i < playerCount) {
+                System.out.println("Czekam na połączenie z graczem " + (i + 1));
                 PlayerHandler player = new PlayerHandler(listener.accept(), this);
-                player.start();
-                playerHandler[i] = player;
-                System.out.println("Player " + (i + 1) + " connected");
+                player.start(); // Uruchomienie handlera dla gracza
+                playerHandler[i] = player; // Zapisanie handlera do tablicy
+                System.out.println("Gracz " + (i + 1) + " połączony.");
                 i++;
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            System.err.println("Błąd podczas uruchamiania serwera: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-    public void printBoard(char[][] mboard) {
-        for (int i = 0; i < 17; i++) {
-            for (int j = 0; j < 25; j++) {
-                System.out.print(mboard[i][j]);
-            }
-            System.out.println();
         }
     }
 
@@ -47,31 +44,46 @@ public class Board {
     }
 
     public boolean isPlayerTurn(int playerNumber) {
-        return playerNumber == currentTurn;
+        return playerNumber == currentTurn; // Sprawdzanie, czy to tura gracza
     }
 
     public void nextTurn() {
         playerHandler[currentTurn].validate = new Validator(); // Reset walidatora
-        currentTurn = (currentTurn + 1) % playerCount; // Przejście do kolejnej tury
+        currentTurn = (currentTurn + 1) % playerCount; // Przechodzenie do kolejnej tury
         broadcast(new Packet("TURN", "Tura gracza: " + (currentTurn + 1)));
     }
 
     public Boolean isValidMove(Packet packet) {
-        return new Validator().isMoveValid(packet, board);
+        return new Validator().isMoveValid(packet, board); // Walidacja ruchu
     }
 
     public void updateBoard(Packet packet) {
-        // Uzupełnienie później
-         //printBoard(board);
-         board[packet.newY][packet.newX] = board[packet.oldY][packet.oldX];
-         board[packet.oldY][packet.oldX] = 'p';
-
-         //printBoard(board);
-         //System.out.println("Moved from " + packet.oldX + " " + packet.oldY+" ("+board[packet.newY][packet.newX]+") " + " to " + packet.newX + " " + packet.newY);
-         broadcast(new Packet(board));
+        board[packet.newY][packet.newX] = board[packet.oldY][packet.oldX];
+        board[packet.oldY][packet.oldX] = 'p';
+        broadcast(new Packet(board));
     }
 
-    // Metoda zwracająca planszę (ważna dla PlayerHandler)
+    public boolean hasMoreJumps(int x, int y) {
+        // Sprawdzenie wszystkich możliwych kierunków dla kolejnych skoków
+        int[][] directions = {{-2, -2}, {-2, 2}, {2, -2}, {2, 2}};
+        for (int[] dir : directions) {
+            int newX = x + dir[0];
+            int newY = y + dir[1];
+            int midX = x + dir[0] / 2;
+            int midY = y + dir[1] / 2;
+
+            // Sprawdź, czy nowa pozycja jest w granicach planszy
+            if (newX >= 0 && newX < board[0].length && newY >= 0 && newY < board.length) {
+                // Sprawdź, czy miejsce docelowe jest puste, a pozycja środkowa zajęta
+                if (board[newY][newX] == ' ' && board[midY][midX] != ' ' && board[midY][midX] != 'p') {
+                    return true; // Możliwy kolejny skok
+                }
+            }
+        }
+        return false; // Brak możliwych kolejnych skoków
+    }
+
+
     public char[][] getBoard() {
         return board;
     }
@@ -118,9 +130,9 @@ public class Board {
 
     public void broadcast(Packet packet) {
         for (PlayerHandler player : playerHandler) {
-            if(player==null) System.out.println("Player is null");
-            System.out.println("Sending packet to player");
-            player.send(packet);
+            if (player != null) {
+                player.send(packet);
+            }
         }
     }
 
