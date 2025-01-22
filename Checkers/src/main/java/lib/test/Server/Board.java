@@ -1,8 +1,8 @@
 package lib.test.Server;
 
 import lib.test.Communication.Packet;
-import java.util.LinkedList;
-import java.util.Queue;
+
+import java.util.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -12,9 +12,25 @@ public class Board {
     private final char[][] board = new char[17][25]; // Plansza gry
     private final int playerCount; // Liczba graczy
     private int currentTurn = 0; // Tura gracza
-
+    private final Map<Character, Pair> colorToHomeMap = new HashMap<>();
     private final char[] colors = {'r', 'b', 'g', 'y', 'o', 'v'}; // Kolory graczy
 
+    private ArrayList<Character> winners = new ArrayList<>();
+
+    public record Pair(int x, int y) {
+        @Override
+        public String toString() {
+            return "(" + x + ", " + y + ")";
+        }
+    }
+
+    public void refreshWinners() {
+        this.winners = getAllWinningColors();
+    }
+
+    public boolean didPlayerWin(Character color) {
+        return this.winners.contains(color);
+    }
     // Konstruktor
     public Board(int port, int playerCount) {
         this.playerCount = playerCount;
@@ -51,7 +67,7 @@ public class Board {
     public void nextTurn() {
         playerHandler[currentTurn].validate = new Validator(); // Reset walidatora
         currentTurn = (currentTurn + 1) % playerCount; // Przechodzenie do kolejnej tury
-        broadcast(new Packet("TURN", "Tura gracza: " + (currentTurn + 1)));
+        broadcast(new Packet("TURN", "Tura gracza: " + (currentTurn + 1))); // TODO(ja): ensure that the player that we just chose did not yet win
     }
 
     public Boolean isValidMove(Packet packet) {
@@ -113,13 +129,8 @@ public class Board {
             }
         }
 
-        // Jeśli nie znaleziono kolejnych skoków, zwróć false
         return false;
     }
-
-
-
-
 
     public char[][] getBoard() {
         return board;
@@ -138,32 +149,63 @@ public class Board {
         fillFromBottom(16, 12);
         switch (playerCount) {
             case 2:
-                fillTriangleTop(0, 12, 0 + 4, 'r');
-                fillTriangleBottom(16, 12, 16 - 4, 'b');
+                fillTriangleTop(0, 12, 0 + 4, 'r');  // accessed by board[y][x]
+                colorToHomeMap.put('r', new Pair(12, 16));
+
+                fillTriangleBottom(16, 12, 16 - 4, 'b');  // accessed by board[y][x]
+                colorToHomeMap.put('b', new Pair(12, 0));
                 break;
+
             case 3:
                 fillTriangleTop(0, 12, 0 + 4, 'r');
+                colorToHomeMap.put('r', new Pair(16, 12));
+
                 fillTriangleTop(9, 3, 9 + 4, 'b');
+                colorToHomeMap.put('b', new Pair(9, 21));
+
                 fillTriangleTop(9, 21, 9 + 4, 'g');
+                colorToHomeMap.put('g', new Pair(9, 3));
                 break;
+
             case 4:
                 fillTriangleTop(9, 3, 9 + 4, 'r');
+                colorToHomeMap.put('r', new Pair(7, 21));
+
                 fillTriangleTop(9, 21, 9 + 4, 'b');
+                colorToHomeMap.put('b', new Pair(7, 3));
+
                 fillTriangleBottom(7, 3, 7 - 4, 'g');
+                colorToHomeMap.put('g', new Pair(9, 21));
+
                 fillTriangleBottom(7, 21, 7 - 4, 'y');
+                colorToHomeMap.put('y', new Pair(9, 3));
                 break;
+
             case 6:
                 fillTriangleTop(0, 12, 0 + 4, 'r');
+                colorToHomeMap.put('r', new Pair(16, 12));
+
                 fillTriangleBottom(16, 12, 16 - 4, 'b');
+                colorToHomeMap.put('b', new Pair(0, 12));
+
                 fillTriangleTop(9, 3, 9 + 4, 'g');
+                colorToHomeMap.put('g', new Pair(7, 21));
+
                 fillTriangleTop(9, 21, 9 + 4, 'y');
+                colorToHomeMap.put('y', new Pair(7, 3));
+
                 fillTriangleBottom(7, 3, 7 - 4, 'o');
+                colorToHomeMap.put('o', new Pair(9, 21));
+
                 fillTriangleBottom(7, 21, 7 - 4, 'v');
+                colorToHomeMap.put('v', new Pair(9, 3));
                 break;
+
             default:
                 break;
         }
     }
+
 
     public void broadcast(Packet packet) {
         for (PlayerHandler player : playerHandler) {
