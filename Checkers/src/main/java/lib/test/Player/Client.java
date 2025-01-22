@@ -7,6 +7,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -16,6 +17,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import lib.test.Player.FXClasses.MyCircle;
+
+import javax.sound.midi.SysexMessage;
 
 public class Client extends Application {
 //getboarddoer funkcja ktora wywoluje doer
@@ -200,7 +203,7 @@ public class Client extends Application {
     }
 
     @Override
-    public void start(Stage mainStage) {
+    public void start(Stage mainStage) { // Gui INIT here
         // Initialize ClientHandler using static fields
         doer = new ClientHandler(serverAddress, port, this);
         new Thread(doer).start();
@@ -240,8 +243,21 @@ public class Client extends Application {
             }
         });
 
+        doer.addWinAction(() -> {
+            showWinPopup();
+            return null;
+        });
+
         // Call methods on doer
         //doer.say("Hello");
+    }
+
+    private void showWinPopup() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Over");
+        alert.setHeaderText(null);
+        alert.setContentText("You win!");
+        alert.showAndWait(); // Wait for the user to close the popup
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class PlayerHandler extends Thread {
     private Socket socket;
@@ -69,13 +70,28 @@ public class PlayerHandler extends Thread {
             return;
         }
 
+        if (board.didPlayerWin(this.playerColor)) {
+            System.out.println("This player tried to move but its not his turn");
+            return;
+        }
+
         if (board.isValidMove(packet)) {
             board.updateBoard(packet);
 
-            // Rozróżnienie ruchu pojedynczego i skoku
-            boolean isJump = Math.abs(packet.newX - packet.oldX) > 1 || Math.abs(packet.newY - packet.oldY) > 1;
+            board.refreshWinners();
 
-            if (isJump && board.hasMoreJumps(packet.newX, packet.newY)) {
+            if (board.didPlayerWin(this.playerColor)) {
+                System.out.println("This player won, how cool: " + this.playerColor);
+                // gracz wlasnie wygral, nie ma potrzeby sprawdzania dalej czy moze wykonac wiecej ruchow
+                send(new Packet("YOU_WON", "Wygrales, brawo"));
+                board.nextTurn();
+                return;
+            }
+
+            // Rozróżnienie ruchu pojedynczego i skoku
+            boolean isJump = Math.abs(packet.newX - packet.oldX) > 1 || Math.abs(packet.newY - packet.oldY) > 1; // TODO(ja): store this and check before each move to ensure that the player cant move afer he jumped prev
+
+            if (isJump && board.hasMoreJumps(packet.newX, packet.newY, packet.oldX, packet.oldY)) {
                 // Wielokrotny skok - gracz może kontynuować
                 send(new Packet("MORE_JUMPS", "Możesz kontynuować skoki."));
             } else {

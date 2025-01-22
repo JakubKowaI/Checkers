@@ -8,6 +8,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -15,6 +18,7 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream outa;
     private boolean running = true;
     private Client client;
+    private final List<Callable<Void>> onWinActions = new ArrayList<>();
 
     public ClientHandler(String address, int port, Client client) {
         try {
@@ -24,6 +28,20 @@ public class ClientHandler implements Runnable {
             this.client = client;
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void addWinAction(Callable<Void> action) {
+        onWinActions.add(action);
+    }
+
+    public void executeOnWinActions() {
+        for (Callable<Void> action : onWinActions) {
+            try {
+                action.call(); // Execute the callable
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -104,6 +122,9 @@ public class ClientHandler implements Runnable {
                         client.displayMessage(packet.message);
                     } else if (packet.command.equals("NOT_YOUR_TURN")) {
                         client.displayMessage(packet.message);
+                    } else if (packet.command.equals("YOU_WON")) {
+                        client.displayMessage(packet.message);
+                        executeOnWinActions();
                     } else if (packet.command.equals("TURN")) {
                         client.displayMessage(packet.message);
                     }
