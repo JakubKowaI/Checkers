@@ -79,49 +79,95 @@ public class Board {
         board[packet.oldY][packet.oldX] = 'p';
         broadcast(new Packet(board));
     }
-    public boolean hasMoreJumps(int x, int y) {
-        // Kolejka do BFS i zbiór odwiedzonych współrzędnych
+
+    public boolean hasMoreJumps(int x, int y, int excludeX, int excludeY) {
+        // Directions for possible jumps
+        int[][] directions = {
+                {-2, -2},
+                {-2, 2},
+                {2, -2},
+                {2, 2},
+        //        {-4, 0},
+        //        {4, 0}  // TODO(ja): uncomment after fixing validator codes (adds ability to hop to the sides)
+        };
+
+        // Loop through each direction
+        for (int[] dir : directions) {
+            int newX = x + dir[0]; // Target position X
+            int newY = y + dir[1]; // Target position Y
+            int midX = x + dir[0] / 2; // Middle position X
+            int midY = y + dir[1] / 2; // Middle position Y
+
+            // Check if the target position is within board bounds
+            if (newX >= 0 && newX < board[0].length && newY >= 0 && newY < board.length &&
+                    midX >= 0 && midX < board[0].length && midY >= 0 && midY < board.length) {
+
+                // Exclude the jump if the target position matches (excludeX, excludeY)
+                if (newX == excludeX && newY == excludeY) {
+                    continue; // Skip this jump direction
+                }
+
+                // Check if the target position is empty ('p') and middle position contains another piece
+                if (board[newY][newX] == 'p' && board[midY][midX] != ' ' && board[midY][midX] != 'p') {
+                    return true; // Jump is possible
+                }
+            }
+        }
+
+        // If no valid jumps are possible
+        return false;
+    }
+
+    public ArrayList<Character> getAllWinningColors() {
+        System.out.println("getAllWinningColors called");
+        ArrayList<Character> winners = new ArrayList<>();
+
+
+        for (Map.Entry<Character, Pair> entry : colorToHomeMap.entrySet()) {
+            Character color = entry.getKey();
+            Pair originPoint = entry.getValue();
+
+            if (!hasTenOfColor(color, originPoint)) continue;
+
+            winners.add(color);
+        }
+        return winners;
+    }
+
+    public boolean hasTenOfColor(Character color, Pair originPoint) {
         Queue<int[]> coordinateQueue = new LinkedList<>();
         boolean[][] visited = new boolean[board.length][board[0].length];
 
-        // Dodaj początkową pozycję do kolejki
-        coordinateQueue.add(new int[]{x, y});
-        visited[y][x] = true;
+        coordinateQueue.add(new int[]{originPoint.x, originPoint.y});
+        visited[originPoint.y][originPoint.x] = true;
 
-        // Kierunki, w których można wykonywać skoki
-        int[][] directions = {{-2, -2}, {-2, 2}, {2, -2}, {2, 2}};
+        int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}, {2, 0}, {-2, 0}};
+
+        if (board[originPoint.y][originPoint.x] != color)  return false;
+
+        int discoveredFields = 1;
 
         while (!coordinateQueue.isEmpty()) {
             int[] current = coordinateQueue.poll();
             int currentX = current[0];
             int currentY = current[1];
-
-            // Sprawdź wszystkie możliwe kierunki skoku
             for (int[] dir : directions) {
                 int newX = currentX + dir[0];
                 int newY = currentY + dir[1];
-                int midX = currentX + dir[0] / 2;
-                int midY = currentY + dir[1] / 2;
 
-                // Sprawdź, czy pole docelowe i pośrednie są w granicach planszy
-                if (newX >= 0 && newX < board[0].length && newY >= 0 && newY < board.length &&
-                        midX >= 0 && midX < board[0].length && midY >= 0 && midY < board.length) {
-
-                    // Sprawdź, czy miejsce docelowe jest puste
-                    if (board[newY][newX] == ' ') {
-                        // Sprawdź, czy na polu pośrednim jest pionek przeciwnika
-                        if (board[midY][midX] != ' ' && board[midY][midX] != 'p') {
-
-                            // Jeśli współrzędne docelowe już odwiedzono, pomiń
-                            if (visited[newY][newX]) {
-                                continue;
-                            }
-
-                            // Dodaj pole docelowe do odwiedzonych i kolejki
-                            visited[newY][newX] = true;
-                            coordinateQueue.add(new int[]{newX, newY});
-
-                            // Możliwy kolejny skok, więc zwróć true
+                if (newX >= 0 && newX < board[0].length && newY >= 0 && newY < board.length) {
+                    if (!visited[newY][newX]) {
+                        if (!Character.isLetter(board[newY][newX])) {
+                            continue;
+                        }
+                        if (board[newY][newX] != color) {
+                            return false;
+                        }
+                        visited[newY][newX] = true;
+                        coordinateQueue.add(new int[]{newX, newY});
+                        discoveredFields++;
+                        if (discoveredFields == 10) {
+                            System.out.println("Detected " + color + " win");
                             return true;
                         }
                     }
