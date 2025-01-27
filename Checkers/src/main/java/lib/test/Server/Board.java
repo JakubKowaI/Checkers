@@ -45,6 +45,9 @@ public class Board {
             while (i < playerCount) {
                 System.out.println("Czekam na połączenie z graczem " + (i + 1));
                 PlayerHandler player = new PlayerHandler(listener.accept(), this);
+                //Bot bot = new Bot(this);
+                //bot.setStrategy(new NormalStrategy());
+                //bot.start();
                 player.start(); // Uruchomienie handlera dla gracza
                 playerHandler[i] = player; // Zapisanie handlera do tablicy
                 System.out.println("Gracz " + (i + 1) + " połączony.");
@@ -70,6 +73,7 @@ public class Board {
         broadcast(new Packet("TURN", "Tura gracza: " + (currentTurn + 1))); // TODO(ja): ensure that the player that we just chose did not yet win
     }
 
+
     public Boolean isValidMove(Packet packet) {
         return new Validator().isMoveValid(packet, board); // Walidacja ruchu
     }
@@ -88,8 +92,8 @@ public class Board {
                 {2, -2},
                 {2, 2},
         //        {-4, 0},
-        //        {4, 0}  // TODO(ja): uncomment after fixing validator codes (adds ability to hop to the sides)
-        };
+        //        {4, 0}  // TODO(ja): uncomment after fixing validator codes (adds ability to hop to the sides). when the player when he's jumping numeros moves, block the oher powns
+        }; 
 
         // Loop through each direction
         for (int[] dir : directions) {
@@ -251,7 +255,7 @@ public class Board {
                 break;
         }
     }
-
+//spr
 
     public void broadcast(Packet packet) {
         for (PlayerHandler player : playerHandler) {

@@ -14,9 +14,9 @@ public class PlayerHandler extends Thread {
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private static int playerCount = 0;
-    private final int playerNumber;
+    protected final int playerNumber;
     private final char playerColor; // Kolor gracza
-    private final Board board;
+    protected final Board board;
 
     public Validator validate = new Validator();
 
