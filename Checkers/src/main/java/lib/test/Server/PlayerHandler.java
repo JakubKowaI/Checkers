@@ -19,6 +19,8 @@ public class PlayerHandler extends Thread {
     public final char playerColor; // Kolor gracza
     public final Board board;
 
+    public final Board board;
+
     public Validator validate = new Validator();
 
     public PlayerHandler(Socket accept, Board board) {
