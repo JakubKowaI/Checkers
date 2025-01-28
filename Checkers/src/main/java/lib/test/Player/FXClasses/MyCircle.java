@@ -71,7 +71,9 @@ public class MyCircle extends Circle {
                 //System.out.println("Collision detected");
                 client.sendMove(this.x, this.y, targetX, targetY);
             }
-            client.doer.getBoard();
+
+          client.doer.getBoard();
+
 
             //if (!collisionDetected) {
             this.setCenterX(lastX);

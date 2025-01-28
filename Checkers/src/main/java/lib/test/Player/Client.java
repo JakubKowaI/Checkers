@@ -21,7 +21,8 @@ import lib.test.Player.FXClasses.MyCircle;
 import javax.sound.midi.SysexMessage;
 
 public class Client extends Application {
-    //getboarddoer funkcja ktora wywoluje doer
+
+//getboarddoer funkcja ktora wywoluje doer
     private static String serverAddress;
     private static int port;
     Pane background;
@@ -57,10 +58,12 @@ public class Client extends Application {
                 MyCircle myCircle = null;
                 if(board[i][j]!=' ') {
 
+
                     //row.getChildren().add(circle);
                     background.getChildren().add(circle);
                     circle.setCenterX((j * 13) + 15);
                     circle.setCenterY((i * 20) + 15);
+
 
 //                    case 'r':
 
