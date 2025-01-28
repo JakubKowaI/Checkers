@@ -10,18 +10,18 @@ public class Validator {
     private void calculatePossibleMoves(int X, int Y) {
         possibleMoves = new char[17][25];
 
-            try{
-                if(boardState[Y+1][X+1] == 'p'){
-                    possibleMoves[Y+1][X+1] = 'x';
-                } else if (boardState[Y+1][X+1] == ' '){
-                }else{
-                    if(boardState[Y+2][X+2] == 'p'){
-                        possibleMoves[Y+2][X+2] = 'x';
-                    }
+        try{
+            if(boardState[Y+1][X+1] == 'p'){
+                possibleMoves[Y+1][X+1] = 'x';
+            } else if (boardState[Y+1][X+1] == ' '){
+            }else{
+                if(boardState[Y+2][X+2] == 'p'){
+                    possibleMoves[Y+2][X+2] = 'x';
                 }
-            }catch (Exception e){
-                //e.printStackTrace();
             }
+        }catch (Exception e){
+            //e.printStackTrace();
+        }
         try{
             if(boardState[Y+1][X-1] == 'p'){
                 possibleMoves[Y+1][X-1] = 'x';

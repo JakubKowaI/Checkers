@@ -1,6 +1,10 @@
 package lib.test.Server;
 
 import lib.test.Communication.Packet;
+import lib.test.DB.AppConfig;
+import lib.test.DB.MyService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.*;
 import java.io.IOException;
@@ -14,6 +18,17 @@ public class Board {
     private int currentTurn = 0; // Tura gracza
     private final Map<Character, Pair> colorToHomeMap = new HashMap<>();
     private final char[] colors = {'r', 'b', 'g', 'y', 'o', 'v'}; // Kolory graczy
+    MyService myService;
+
+    private ArrayList<Character> winners = new ArrayList<>();
+
+    public record Pair(int x, int y) {
+        @Override
+        public String toString() {
+            return "(" + x + ", " + y + ")";
+        }
+    }
+
 
     private ArrayList<Character> winners = new ArrayList<>();
 
@@ -38,6 +53,17 @@ public class Board {
         resetBoard();
         fillBoard();
 
+        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        // Retrieve the MyService bean
+        myService = context.getBean(MyService.class);
+
+        // Use the service
+        myService.addSession(playerCount);
+        int id = myService.getSessionID();
+        myService.createTable();
+        System.out.println("Session ID: " + id);
+
         try {
             this.listener = new ServerSocket(port); // Tworzenie gniazda serwera
             int i = 0;
@@ -45,9 +71,11 @@ public class Board {
             while (i < playerCount) {
                 System.out.println("Czekam na połączenie z graczem " + (i + 1));
                 PlayerHandler player = new PlayerHandler(listener.accept(), this);
+
                 //Bot bot = new Bot(this);
                 //bot.setStrategy(new NormalStrategy());
                 //bot.start();
+
                 player.start(); // Uruchomienie handlera dla gracza
                 playerHandler[i] = player; // Zapisanie handlera do tablicy
                 System.out.println("Gracz " + (i + 1) + " połączony.");
@@ -81,6 +109,10 @@ public class Board {
     public void updateBoard(Packet packet) {
         board[packet.newY][packet.newX] = board[packet.oldY][packet.oldX];
         board[packet.oldY][packet.oldX] = 'p';
+
+        char color = playerHandler[currentTurn].playerColor;
+        myService.updateTable(packet.oldX, packet.oldY, packet.newX, packet.newY, color);
+
         broadcast(new Packet(board));
     }
 
@@ -91,9 +123,11 @@ public class Board {
                 {-2, 2},
                 {2, -2},
                 {2, 2},
+
         //        {-4, 0},
         //        {4, 0}  // TODO(ja): uncomment after fixing validator codes (adds ability to hop to the sides). when the player when he's jumping numeros moves, block the oher powns
         }; 
+
 
         // Loop through each direction
         for (int[] dir : directions) {
@@ -256,6 +290,7 @@ public class Board {
         }
     }
 //spr
+
 
     public void broadcast(Packet packet) {
         for (PlayerHandler player : playerHandler) {

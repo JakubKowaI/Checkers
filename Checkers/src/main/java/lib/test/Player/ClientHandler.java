@@ -54,7 +54,7 @@ public class ClientHandler implements Runnable {
                 if(socket == null) {
                     System.out.println("Socket is null, cannot send message.");
                 } else
-                System.out.println("Socket is closed, cannot send message.");
+                    System.out.println("Socket is closed, cannot send message.");
             }
         } catch (Exception e) {
             e.printStackTrace();

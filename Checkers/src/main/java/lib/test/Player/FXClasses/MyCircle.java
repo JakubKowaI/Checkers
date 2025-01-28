@@ -35,10 +35,10 @@ public class MyCircle extends Circle {
         // Press event: capture the offset between mouse and circle center
         this.setOnMousePressed(event -> {
             if(isColor(this.getFill())) return;
-                lastX = this.getCenterX();
-                lastY = this.getCenterY();
-                offsetX[0] = event.getSceneX() - this.getCenterX();
-                offsetY[0] = event.getSceneY() - this.getCenterY();
+            lastX = this.getCenterX();
+            lastY = this.getCenterY();
+            offsetX[0] = event.getSceneX() - this.getCenterX();
+            offsetY[0] = event.getSceneY() - this.getCenterY();
 
         });
 
@@ -71,11 +71,13 @@ public class MyCircle extends Circle {
                 //System.out.println("Collision detected");
                 client.sendMove(this.x, this.y, targetX, targetY);
             }
+
           client.doer.getBoard();
 
+
             //if (!collisionDetected) {
-                this.setCenterX(lastX);
-                this.setCenterY(lastY);
+            this.setCenterX(lastX);
+            this.setCenterY(lastY);
             //}
         });
     }
