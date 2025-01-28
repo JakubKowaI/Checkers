@@ -1,6 +1,10 @@
 package lib.test.Server;
 
 import lib.test.Communication.Packet;
+import lib.test.DB.AppConfig;
+import lib.test.DB.MyService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.*;
 import java.io.IOException;
@@ -38,6 +42,17 @@ public class Board {
         resetBoard();
         fillBoard();
 
+        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        // Retrieve the MyService bean
+        myService = context.getBean(MyService.class);
+
+        // Use the service
+        myService.addSession(playerCount);
+        int id = myService.getSessionID();
+        myService.createTable();
+        System.out.println("Session ID: " + id);
+
         try {
             this.listener = new ServerSocket(port); // Tworzenie gniazda serwera
             int i = 0;
@@ -45,6 +60,11 @@ public class Board {
             while (i < playerCount) {
                 System.out.println("Czekam na połączenie z graczem " + (i + 1));
                 PlayerHandler player = new PlayerHandler(listener.accept(), this);
+
+                //Bot bot = new Bot(this);
+                //bot.setStrategy(new NormalStrategy());
+                //bot.start();
+
                 player.start(); // Uruchomienie handlera dla gracza
                 playerHandler[i] = player; // Zapisanie handlera do tablicy
                 System.out.println("Gracz " + (i + 1) + " połączony.");
@@ -77,6 +97,10 @@ public class Board {
     public void updateBoard(Packet packet) {
         board[packet.newY][packet.newX] = board[packet.oldY][packet.oldX];
         board[packet.oldY][packet.oldX] = 'p';
+
+        char color = playerHandler[currentTurn].playerColor;
+        myService.updateTable(packet.oldX, packet.oldY, packet.newX, packet.newY, color);
+
         broadcast(new Packet(board));
     }
 
