@@ -18,8 +18,7 @@ public class PlayerHandler extends Thread {
     public final int playerNumber;
     public final char playerColor; // Kolor gracza
     public final Board board;
-
-    public final Board board;
+    
 
     public Validator validate = new Validator();
 
