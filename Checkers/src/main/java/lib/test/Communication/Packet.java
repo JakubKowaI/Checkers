@@ -1,6 +1,8 @@
 package lib.test.Communication;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class Packet implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -20,6 +22,11 @@ public class Packet implements Serializable {
         this.command = command;
         this.color = color;
     }
+    //
+    public Packet(String command, char[][] board) {
+        this.command = command;
+        this.board = board;
+    }
 
     public Packet(char[][] board) {
         this.board = board;
@@ -35,4 +42,35 @@ public class Packet implements Serializable {
 
     public Packet(int startX, int startY, int endX, int endY) {
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Packet packet = (Packet) obj;
+        return oldX == packet.oldX &&
+                oldY == packet.oldY &&
+                newX == packet.newX &&
+                newY == packet.newY &&
+                color == packet.color &&
+                Objects.equals(command, packet.command) &&
+                Objects.equals(message, packet.message) &&
+                Arrays.deepEquals(board, packet.board);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(command, message, oldX, oldY, newX, newY, color);
+        result = 31 * result + Arrays.deepHashCode(board);
+        return result;
+    }
 }
+
+
+
+
+

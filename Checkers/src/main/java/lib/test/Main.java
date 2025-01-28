@@ -1,12 +1,18 @@
 package lib.test;
 
+import lib.test.DB.MainTable;
+import lib.test.DB.UserService;
 import lib.test.Player.Client;
 import lib.test.Server.BoardBuilder;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.Scanner;
 
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
+        //UserService service = new UserService();
+        //service.saveUser(new MainTable("Test", 2));
         System.out.println("Wybierz aplikacje do zbudowania:\n1. Server\n2. Client");
         Scanner input = new Scanner(System.in);
         int choice = 0;

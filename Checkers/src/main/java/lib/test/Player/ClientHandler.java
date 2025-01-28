@@ -8,6 +8,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -15,6 +18,7 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream outa;
     private boolean running = true;
     private Client client;
+    private final List<Callable<Void>> onWinActions = new ArrayList<>();
 
     public ClientHandler(String address, int port, Client client) {
         try {
@@ -27,6 +31,20 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public void addWinAction(Callable<Void> action) {
+        onWinActions.add(action);
+    }
+
+    public void executeOnWinActions() {
+        for (Callable<Void> action : onWinActions) {
+            try {
+                action.call(); // Execute the callable
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void say(String message) {
         try {
             if (socket != null && !socket.isClosed()) {
@@ -36,7 +54,7 @@ public class ClientHandler implements Runnable {
                 if(socket == null) {
                     System.out.println("Socket is null, cannot send message.");
                 } else
-                System.out.println("Socket is closed, cannot send message.");
+                    System.out.println("Socket is closed, cannot send message.");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,12 +63,25 @@ public class ClientHandler implements Runnable {
 
     public void move(int x, int y, int x2, int y2) {
         try {
+            outa.reset();
             outa.writeObject(new Packet("MOVE", x, y, x2, y2));
             outa.flush(); // Ensure the packet is sent immediately
-            getBoard();
+            outa.reset();
+            //getBoard();
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Socket is closed, cannot move.");
+        }
+    }
+    public void giveTurn() {
+        try {
+            outa.reset();
+            outa.writeObject(new Packet("GIVE_TURN", ""));
+            outa.flush(); // Ensure the packet is sent immediately
+            outa.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Socket is closed, cannot give turn.");
         }
     }
 
@@ -74,14 +105,13 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // In ClientHandler.java
     private void processObject(Object object) {
         if (object instanceof Packet) {
             Packet packet = (Packet) object;
             Platform.runLater(() -> {
                 if (packet.board != null) {
-                    System.out.println("Received updated board:");
-                    printBoard(packet.board);
+                    System.out.println("Otrzymano zaktualizowaną planszę:");
+                    //printBoard(packet.board);
                     client.refreshBoard(packet.board);
                 } else {
                     if (packet.command.equals("SAY")) {
@@ -92,11 +122,17 @@ public class ClientHandler implements Runnable {
                         client.displayMessage(packet.message);
                     } else if (packet.command.equals("NOT_YOUR_TURN")) {
                         client.displayMessage(packet.message);
+                    } else if (packet.command.equals("YOU_WON")) {
+                        client.displayMessage(packet.message);
+                        executeOnWinActions();
+                    } else if (packet.command.equals("TURN")) {
+                        client.displayMessage(packet.message);
                     }
                 }
             });
         }
     }
+
 
     public void stop() {
         running = false;
