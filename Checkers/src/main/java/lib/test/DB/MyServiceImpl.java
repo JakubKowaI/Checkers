@@ -1,5 +1,6 @@
 package lib.test.DB;
 
+import lib.test.Replay.Move;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -58,5 +59,23 @@ public class MyServiceImpl implements MyService {
         String color = String.valueOf(playerColor);
         String gameSesh = "game"+getSessionID();
         jdbcTemplate.update("INSERT INTO game"+getSessionID()+" (old_x, old_y, new_x, new_y, player) VALUES (?, ?, ?, ?, ?)", oldX, oldY, newX, newY, color);
+    }
+
+    @Override
+    public Move[] getFullReplay(int gameId){
+        return jdbcTemplate.query("SELECT * FROM game"+gameId, (rs, rowNum) -> new Move(
+                rs.getInt("old_x"),
+                rs.getInt("old_y"),
+                rs.getInt("new_x"),
+                rs.getInt("new_y"),
+                rs.getString("player").charAt(0)
+        )).toArray(new Move[0]);
+    }
+
+    @Override
+    public int getPlayerCount(int gameId) {
+        String game = "game"+gameId;
+        String query = "SELECT players FROM sessions WHERE sessionName = \'"+game+"\'";
+        return jdbcTemplate.queryForObject(query, Integer.class);
     }
 }

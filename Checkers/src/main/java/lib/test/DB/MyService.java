@@ -1,5 +1,7 @@
 package lib.test.DB;
 
+import lib.test.Replay.Move;
+
 public interface MyService {
     void createTable();
     void insertUser(int id, String name);
@@ -10,4 +12,8 @@ public interface MyService {
     int getSessionID();
 
     void updateTable(int oldX, int oldY, int newX, int newY, char playerColor);
+
+    Move[] getFullReplay(int gameId);
+
+    int getPlayerCount(int gameId);
 }
