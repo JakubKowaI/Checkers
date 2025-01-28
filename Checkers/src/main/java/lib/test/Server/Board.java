@@ -29,16 +29,6 @@ public class Board {
         }
     }
 
-
-    private ArrayList<Character> winners = new ArrayList<>();
-
-    public record Pair(int x, int y) {
-        @Override
-        public String toString() {
-            return "(" + x + ", " + y + ")";
-        }
-    }
-
     public void refreshWinners() {
         this.winners = getAllWinningColors();
     }
